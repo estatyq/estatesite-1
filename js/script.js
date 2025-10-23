@@ -1066,7 +1066,7 @@ function renderProperties() {
     card.className = "property-card";
     card.innerHTML = `
       <div class="property-image">
-        <img src="${prop.image}" alt="${prop.title}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="${prop.image}" alt="${prop.title}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
         <div class="property-badge">${prop.transactionType === "sale" ? "Продаж" : "Оренда"}</div>
       </div>
       <div class="property-content">
@@ -1082,7 +1082,7 @@ function renderProperties() {
 
         <div class="property-action">
           <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
-          <button class="btn-like" onclick="toggleLike(event)">♡</button>
+          <button class="btn-like" onclick="toggleLike(event)"><span>♡</span></button>
         </div>
       </div>
     `;
@@ -1166,10 +1166,140 @@ function updateTelegramButton() {
   }
 }
 
+// ==================== ПОИСК И ФИЛЬТРАЦИЯ ====================
+
+function addSearchFunctionality() {
+  // Создаем поле поиска
+  const searchContainer = document.createElement('div');
+  searchContainer.className = 'search-container';
+  searchContainer.innerHTML = `
+    <div class="search-wrapper">
+      <input type="text" id="search-input" placeholder="Поиск по названию, району, городу..." class="search-field">
+      <button class="search-btn" onclick="performSearch()">🔍</button>
+    </div>
+  `;
+  
+  // Вставляем поиск перед каталогом
+  const catalog = document.querySelector('.catalog');
+  catalog.insertBefore(searchContainer, catalog.querySelector('.catalog-header'));
+  
+  // Добавляем обработчик поиска
+  const searchInput = document.getElementById('search-input');
+  let searchTimeout;
+  
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      performSearch();
+    }, 300);
+  });
+}
+
+function performSearch() {
+  const searchInput = document.getElementById('search-input');
+  const searchTerm = searchInput.value.toLowerCase().trim();
+  
+  if (searchTerm === '') {
+    applyFilters();
+    return;
+  }
+  
+  const searchResults = allProperties.filter(prop => {
+    const title = prop.title.toLowerCase();
+    const location = prop.location.toLowerCase();
+    const city = cities[prop.city].name.toLowerCase();
+    
+    return title.includes(searchTerm) || 
+           location.includes(searchTerm) || 
+           city.includes(searchTerm);
+  });
+  
+  displayedCount = 12;
+  renderSearchResults(searchResults);
+}
+
+function renderSearchResults(results) {
+  const grid = document.getElementById('properties-grid');
+  grid.innerHTML = '';
+  
+  if (results.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #d0d0d0; font-size: 18px;">По вашему поисковому запросу ничего не найдено</div>';
+    document.getElementById('load-more-btn').style.display = 'none';
+    return;
+  }
+  
+  const toShow = results.slice(0, displayedCount);
+  
+  toShow.forEach((prop, index) => {
+    const card = document.createElement('div');
+    card.className = 'property-card';
+    card.style.animationDelay = `${index * 0.1}s`;
+    card.innerHTML = `
+      <div class="property-image">
+        <img src="${prop.image}" alt="${prop.title}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+        <div class="property-badge">${prop.transactionType === 'sale' ? 'Продаж' : 'Оренда'}</div>
+      </div>
+      <div class="property-content">
+        <h3 class="property-title">${prop.title}</h3>
+        <p class="property-location">📍 ${prop.location}, ${cities[prop.city].name}</p>
+        
+        <div class="property-details">
+          ${prop.rooms > 0 ? `<div class="detail-item"><div class="detail-item-value">${prop.rooms}</div><div class="detail-item-label">Кімнат</div></div>` : ''}
+          <div class="detail-item"><div class="detail-item-value">${Math.round(prop.area)}</div><div class="detail-item-label">м²</div></div>
+        </div>
+
+        <div class="property-price">$ ${Math.round(prop.price)} ${prop.transactionType === 'rent' ? 'тис./міс' : 'тис.'}</div>
+
+        <div class="property-action">
+          <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
+          <button class="btn-like" onclick="toggleLike(event)"><span>♡</span></button>
+        </div>
+      </div>
+    `;
+    
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    
+    grid.appendChild(card);
+    
+    setTimeout(() => {
+      card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, index * 100);
+  });
+  
+  // Показываем/скрываем кнопку "Показать еще"
+  const btn = document.getElementById('load-more-btn');
+  if (displayedCount >= results.length) {
+    btn.style.display = 'none';
+  } else {
+    btn.style.display = 'block';
+  }
+}
+
 // ==================== ДОПОМІЖНІ ФУНКЦІЇ ====================
 
 function toggleLike(event) {
-  event.target.textContent = event.target.textContent === "♡" ? "♥" : "♡";
+  const button = event.target.closest('.btn-like');
+  const span = button.querySelector('span');
+  const isLiked = span.textContent === '♥';
+  
+  // Анимация изменения
+  button.style.transform = 'scale(1.2)';
+  setTimeout(() => {
+    button.style.transform = 'scale(1)';
+  }, 150);
+  
+  // Изменение иконки
+  span.textContent = isLiked ? '♡' : '♥';
+  
+  // Добавляем класс для стилизации
+  if (isLiked) {
+    button.classList.remove('liked');
+  } else {
+    button.classList.add('liked');
+  }
 }
 
 function resetFilters() {
@@ -1231,6 +1361,9 @@ document.addEventListener("DOMContentLoaded", function() {
   
   // Добавляем слушатели для быстрых фильтров вверху
   setupQuickFilters();
+  
+  // Добавляем функциональность поиска
+  addSearchFunctionality();
 });
 
 // ==================== БЫСТРЫЕ ФИЛЬТРЫ ВВЕРХУ ====================
