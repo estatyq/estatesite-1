@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адмін Панель - Керування Сайтом</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <h1>🎨 DevHub Admin</h1>
+        <div class="user-info">
+            <button class="btn-logout" onclick="logger.download()" style="margin-right: 10px; background: #3b82f6;">📥 Завантажити Логи</button>
+            <span class="user-email" id="user-email">Loading...</span>
+            <button class="btn-logout" id="logout-btn">Вийти</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="admin-container">
+        <div class="success-message" id="success-message"></div>
+        <div class="error-message" id="error-message"></div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <button class="tab-button active" data-tab="contacts">📞 Контакти</button>
+            <button class="tab-button" data-tab="profile">👤 Профіль</button>
+            <button class="tab-button" data-tab="portfolio">🖼️ Портфоліо</button>
+            <button class="tab-button" data-tab="settings">⚙️ Налаштування</button>
+        </div>
+
+        <!-- Tab: Profile -->
+        <div class="tab-content" id="profile-tab">
+            <div class="card">
+                <h2>Редагування Профілю</h2>
+                
+                <div style="background: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+                    <h3 style="color: #10b981; margin: 0 0 10px 0;">📊 Поточні дані профілю:</h3>
+                    <pre id="current-saved-profile" style="color: #888; margin: 0; font-size: 0.9em; max-height: 200px; overflow-y: auto;">Завантаження...</pre>
+                </div>
+
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label for="profile-name">🌐 Назва сайту</label>
+                        <input type="text" id="profile-name" placeholder="DevHub">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-about">📝 Про себе</label>
+                        <textarea id="profile-about" rows="4" placeholder="Розкажіть про себе..." style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-avatar">🖼️ Аватар (URL)</label>
+                        <input type="url" id="profile-avatar" placeholder="https://example.com/avatar.jpg">
+                    </div>
+
+                    <h3 style="margin: 25px 0 15px 0; color: #A855F7;">Галерея Фотографій</h3>
+                    <div id="photos-container">
+                        <!-- Photos will be added here -->
+                    </div>
+                    <button type="button" class="btn" onclick="addPhotoField()" style="background: #3b82f6; margin-bottom: 20px;">➕ Додати фото</button>
+
+                    <div class="form-group">
+                        <label for="profile-video">🎥 YouTube посилання (опціонально)</label>
+                        <input type="url" id="profile-video" placeholder="https://youtube.com/embed/...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-archive">📦 Архів URL (zip файл, опціонально)</label>
+                        <input type="url" id="profile-archive" placeholder="https://example.com/archive.zip">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-description">📖 Детальний опис</label>
+                        <textarea id="profile-description" rows="6" placeholder="Що робили, як робили, результати..." style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn">
+                        <span>💾 Зберегти Профіль</span>
+                    </button>
+                </form>
+
+                <div id="success-message" style="display: none; color: #4ade80; background: #0a3d0a; padding: 15px; border-radius: 8px; margin-top: 15px;"></div>
+                <div id="error-message" style="display: none; color: #f87171; background: #3d0a0a; padding: 15px; border-radius: 8px; margin-top: 15px;"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Contacts -->
+        <div class="tab-content active" id="contacts-tab">
+            <div class="card">
+                <h2>Редагування Контактів</h2>
+                
+                <!-- Current Saved Data -->
+                <div style="background: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+                    <h3 style="color: #10b981; margin: 0 0 10px 0;">📊 Поточні збережені дані:</h3>
+                    <pre id="current-saved-contacts" style="color: #888; margin: 0; font-size: 0.9em; max-height: 200px; overflow-y: auto;">Завантаження...</pre>
+                </div>
+                
+                <form id="contacts-form">
+                    <h3 style="margin-bottom: 15px; color: #A855F7;">Основні Контакти</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telegram">📱 Telegram особистий (без @)</label>
+                            <input type="text" id="telegram" placeholder="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="telegram-channel">📢 Telegram канал (без @)</label>
+                            <input type="text" id="telegram-channel" placeholder="my_channel">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">✉️ Email</label>
+                            <input type="email" id="email" placeholder="hello@example.com" required>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 25px 0 15px; color: #A855F7;">Соціальні Мережі</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="instagram">📸 Instagram (без @)</label>
+                            <input type="text" id="instagram" placeholder="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">📞 Телефон менеджера</label>
+                            <input type="tel" id="phone" placeholder="+380501234567">
+                        </div>
+                        <div class="form-group">
+                            <label for="upwork">💼 Upwork ID (опціонально)</label>
+                            <input type="text" id="upwork" placeholder="~01234567890abcdef">
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 25px 0 15px; color: #A855F7;">Налаштування Сайту</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="site-name">Назва Сайту</label>
+                            <input type="text" id="site-name" placeholder="DevHub" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="site-lang">🌍 Мова за замовчуванням</label>
+                            <select id="site-lang" style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff;">
+                                <option value="uk">🇺🇦 Українська</option>
+                                <option value="en">🇬🇧 English</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">
+                        <span>💾 Зберегти Контакти</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Поточна Конфігурація</h2>
+                <pre id="current-config" style="background: #0a0a0a; padding: 20px; border-radius: 8px; color: #4ade80; overflow-x: auto;"></pre>
+            </div>
+        </div>
+
+        <!-- Tab: Portfolio -->
+        <div class="tab-content" id="portfolio-tab">
+            <div class="card">
+                <h2>Додати Новий Проект</h2>
+                <form id="portfolio-form">
+                    <div class="form-group">
+                        <label for="project-title">Назва Проекту</label>
+                        <input type="text" id="project-title" placeholder="Amazing Project" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project-description">Опис</label>
+                        <textarea id="project-description" rows="4" placeholder="Опис проекту..." style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff; font-family: inherit; resize: vertical;" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="project-icon">Іконка (emoji)</label>
+                            <input type="text" id="project-icon" placeholder="🚀" maxlength="2">
+                        </div>
+                        <div class="form-group">
+                            <label for="project-url">URL на зовнішнє зображення (опціонально)</label>
+                            <input type="url" id="project-url" placeholder="https://example.com/image.jpg">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Технології (через кому)</label>
+                        <input type="text" id="project-tags" placeholder="React, Node.js, MongoDB">
+                    </div>
+
+                    <h3 style="margin: 25px 0 15px 0; color: #A855F7;">📸 Галерея Фотографій (опціонально)</h3>
+                    <div id="project-photos-container">
+                        <!-- Photos will be added here -->
+                    </div>
+                    <button type="button" class="btn" onclick="addProjectPhotoField()" style="background: #3b82f6; margin-bottom: 20px;">➕ Додати фото до проекту</button>
+
+                    <div class="form-group">
+                        <label for="project-video">🎥 YouTube посилання (опціонально)</label>
+                        <input type="url" id="project-video" placeholder="https://www.youtube.com/embed/...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project-archive">📦 Архів URL (zip файл, опціонально)</label>
+                        <input type="url" id="project-archive" placeholder="https://example.com/project.zip">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project-detailed-desc">📖 Детальний Опис Проекту (що робили, як робили)</label>
+                        <textarea id="project-detailed-desc" rows="6" placeholder="Розкажіть більше про проект, його особливості та технічні деталі..." style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn">
+                        <span>➕ Додати Проект</span>
+                    </button>
+                </form>
+
+                <!-- Success/Error Messages -->
+                <div id="success-message" style="display: none; color: #4ade80; background: #0a3d0a; padding: 15px; border-radius: 8px; margin-top: 15px;"></div>
+                <div id="error-message" style="display: none; color: #f87171; background: #3d0a0a; padding: 15px; border-radius: 8px; margin-top: 15px;"></div>
+            </div>
+
+            <div class="card">
+                <h2>Список Проектів</h2>
+                <div class="portfolio-list" id="portfolio-list">
+                    <p style="color: #888; text-align: center; padding: 40px;">Завантаження...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Settings -->
+        <div class="tab-content" id="settings-tab">
+            <div class="card">
+                <h2>Налаштування Firebase</h2>
+                <p style="color: #aaa; margin-bottom: 20px;">
+                    Для роботи адмін панелі потрібно налаштувати Firebase. 
+                    Дивіться інструкцію в файлі <code>FIREBASE_SETUP.md</code>
+                </p>
+                
+                <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px;">Статус З'єднання:</h3>
+                    <div id="firebase-status">Перевірка...</div>
+                </div>
+
+                <a href="../index.html" class="btn btn-secondary" style="display: inline-block; text-decoration: none; text-align: center;">
+                    🏠 Повернутись на сайт
+                </a>
+            </div>
+
+            <div class="card">
+                <h2>Інструкції</h2>
+                <div style="line-height: 1.8; color: #aaa;">
+                    <h3 style="color: #fff; margin-bottom: 10px;">Контакти:</h3>
+                    <p>Змініть Telegram, Email та Upwork дані. Вони автоматично оновляться на всіх сторінках сайту.</p>
+                    
+                    <h3 style="color: #fff; margin: 20px 0 10px;">Портфоліо:</h3>
+                    <p>Додавайте нові проекти з зображеннями, описом та технологіями. Проекти автоматично з'являться на сторінці портфоліо.</p>
+                    
+                    <h3 style="color: #fff; margin: 20px 0 10px;">Зображення:</h3>
+                    <p>Завантажуйте зображення до 5MB. Підтримуються формати: JPG, PNG, WebP.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Project Modal -->
+    <div id="edit-project-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3000; overflow-y: auto; padding: 20px; display: flex; align-items: center; justify-content: center;">
+        <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 30px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="margin: 0; color: #A855F7;">✏️ Редагувати Проект</h2>
+                <button onclick="closeEditProjectModal()" style="background: #A855F7; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer;">✕</button>
+            </div>
+
+            <form id="edit-project-form" style="display: none;">
+                <div class="form-group">
+                    <label for="edit-project-title">Назва Проекту</label>
+                    <input type="text" id="edit-project-title" placeholder="Amazing Project" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-project-description">Опис</label>
+                    <textarea id="edit-project-description" rows="4" placeholder="Опис проекту..." style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff; font-family: inherit; resize: vertical;" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-project-icon">Іконка (emoji)</label>
+                        <input type="text" id="edit-project-icon" placeholder="🚀" maxlength="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-project-url">URL на зовнішнє зображення (опціонально)</label>
+                        <input type="url" id="edit-project-url" placeholder="https://example.com/image.jpg">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Технології (через кому)</label>
+                    <input type="text" id="edit-project-tags" placeholder="React, Node.js, MongoDB">
+                </div>
+
+                <h3 style="margin: 25px 0 15px 0; color: #A855F7;">📸 Галерея Фотографій (опціонально)</h3>
+                <div id="edit-project-photos-container">
+                    <!-- Photos will be added here -->
+                </div>
+                <button type="button" class="btn" onclick="addEditProjectPhotoField()" style="background: #3b82f6; margin-bottom: 20px;">➕ Додати фото до проекту</button>
+
+                <div class="form-group">
+                    <label for="edit-project-video">🎥 YouTube посилання (опціонально)</label>
+                    <input type="url" id="edit-project-video" placeholder="https://www.youtube.com/embed/...">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-project-archive">📦 Архів URL (zip файл, опціонально)</label>
+                    <input type="url" id="edit-project-archive" placeholder="https://example.com/project.zip">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-project-detailed-desc">📖 Детальний Опис Проекту (що робили, як робили)</label>
+                    <textarea id="edit-project-detailed-desc" rows="6" placeholder="Розкажіть більше про проект, його особливості та технічні деталі..." style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+
+                <button type="submit" class="btn" style="margin-top: 20px;">
+                    <span>💾 Зберегти Зміни</span>
+                </button>
+            </form>
+
+            <div id="edit-success-message" style="display: none; color: #4ade80; background: #0a3d0a; padding: 15px; border-radius: 8px; margin-top: 15px;"></div>
+            <div id="edit-error-message" style="display: none; color: #f87171; background: #3d0a0a; padding: 15px; border-radius: 8px; margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- Config & Scripts -->
+    <script src="../config.js"></script>
+    <script src="logger.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
+

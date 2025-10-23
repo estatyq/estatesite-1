@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контакти - EstatyQ | Зв'яжіться з нами</title>
+    <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .contact-form {
+            background: rgba(26, 26, 26, 0.5);
+            padding: 50px;
+            border-radius: 20px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+            margin-top: 60px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #d4af37;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: var(--text-dark);
+            border-radius: 12px;
+            font-family: 'Sora', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: #0a0a0a;
+            border: none;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.25);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="../assets/images/обрезаный_логотип-removebg-preview.png" alt="ESTATYQ" class="logo-icon-image"/>
+                <div class="logo-text">
+                    <h1>ESTATYQ</h1>
+                    <p class="logo-tagline">МРІЯ СТАЄ РЕАЛЬНІСТЮ</p>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Каталог</a></li>
+                <li><a href="about.html">Про нас</a></li>
+                <li><a href="contact.html" class="active">Контакти</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="contact" style="padding: 80px 0;">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 20px; font-size: 2.5rem; color: #d4af37;">🏘️ Контакти</h2>
+            <p style="text-align: center; color: #d0d0d0; margin-bottom: 60px; font-size: 1.1rem;">
+                Оберіть зручний спосіб зв'язку - ми завжди на зв'язку!
+            </p>
+
+            <!-- ПАЛІТРА 1: СИНІЙ + ЗОЛОТО -->
+            <div style="margin-bottom: 80px;">
+                <h3 style="text-align: center; color: #5B9BD5; margin-bottom: 30px; font-size: 1.8rem;">💙 Варіант 1: Синій + Золото</h3>
+                <p style="text-align: center; color: #b0b0b0; margin-bottom: 40px;">Професійність, довіра, престиж</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                    <div style="background: rgba(26, 26, 26, 0.6); padding: 35px; border-radius: 15px; border: 2px solid #5B9BD5; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <h3 style="color: #d4af37; margin-bottom: 15px; font-size: 1.5rem;">📞 Телефон</h3>
+                        <p><a href="tel:+380999999999" style="color: #5B9BD5; text-decoration: none; font-size: 1.3rem; font-weight: 600;">+380 99 999 99 99</a></p>
+                        <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 10px;">Відповідаємо 24/7</p>
+                    </div>
+                    <div style="background: rgba(26, 26, 26, 0.6); padding: 35px; border-radius: 15px; border: 2px solid #5B9BD5; text-align: center;">
+                        <h3 style="color: #d4af37; margin-bottom: 15px; font-size: 1.5rem;">📧 Email</h3>
+                        <p><a href="mailto:info@estatyq.ua" style="color: #5B9BD5; text-decoration: none; font-size: 1.3rem; font-weight: 600;">info@estatyq.ua</a></p>
+                        <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 10px;">Відповідь протягом 1 години</p>
+                    </div>
+                    <div style="background: rgba(26, 26, 26, 0.6); padding: 35px; border-radius: 15px; border: 2px solid #5B9BD5; text-align: center;">
+                        <h3 style="color: #d4af37; margin-bottom: 15px; font-size: 1.5rem;">📍 Адреса</h3>
+                        <p style="color: #5B9BD5; font-size: 1.2rem; font-weight: 600;">м. Київ, вул. Хрещатик, 1</p>
+                        <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 10px;">Офіс на 15 поверху</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ПАЛІТРА 2: ЗЕЛЕНИЙ + ЗОЛОТО -->
+            <div style="margin-bottom: 80px;">
+                <h3 style="text-align: center; color: #52B788; margin-bottom: 30px; font-size: 1.8rem;">💚 Варіант 2: Зелений + Золото</h3>
+                <p style="text-align: center; color: #b0b0b0; margin-bottom: 40px;">Природність, ріст, заспокоєння</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                    <div style="background: rgba(26, 26, 26, 0.6); padding: 35px; border-radius: 15px; border: 2px solid #52B788; text-align: center;">
+                        <h3 style="color: #d4af37; margin-bottom: 15px; font-size: 1.5rem;">📞 Телефон</h3>
+                        <p><a href="tel:+380999999999" style="color: #52B788; text-decoration: none; font-size: 1.3rem; font-weight: 600;">+380 99 999 99 99</a></p>
+                        <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 10px;">Відповідаємо 24/7</p>
+                    </div>
+                    <div style="background: rgba(26, 26, 26, 0.6); padding: 35px; border-radius: 15px; border: 2px solid #52B788; text-align: center;">
+                        <h3 style="color: #d4af37; margin-bottom: 15px; font-size: 1.5rem;">📧 Email</h3>
+                        <p><a href="mailto:info@estatyq.ua" style="color: #52B788; text-decoration: none; font-size: 1.3rem; font-weight: 600;">info@estatyq.ua</a></p>
+                        <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 10px;">Відповідь протягом 1 години</p>
+                    </div>
+                    <div style="background: rgba(26, 26, 26, 0.6); padding: 35px; border-radius: 15px; border: 2px solid #52B788; text-align: center;">
+                        <h3 style="color: #d4af37; margin-bottom: 15px; font-size: 1.5rem;">📍 Адреса</h3>
+                        <p style="color: #52B788; font-size: 1.2rem; font-weight: 600;">м. Київ, вул. Хрещатик, 1</p>
+                        <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 10px;">Офіс на 15 поверху</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ПАЛІТРА 3: СРІБЛО + ЗОЛОТО -->
+            <div style="margin-bottom: 80px;">
+                <h3 style="text-align: center; color: #C0C0C0; margin-bottom: 30px; font-size: 1.8rem;">🤍 Варіант 3: Срібло + Золото</h3>
+                <p style="text-align: center; color: #b0b0b0; margin-bottom: 40px;">Елегантність, мінімалізм, розкіш</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                    <div style="background: rgba(26, 26, 26, 0.6); padding: 35px; border-radius: 15px; border: 2px solid #C0C0C0; text-align: center;">
+                        <h3 style="color: #d4af37; margin-bottom: 15px; font-size: 1.5rem;">📞 Телефон</h3>
+                        <p><a href="tel:+380999999999" style="color: #E5E4E2; text-decoration: none; font-size: 1.3rem; font-weight: 600;">+380 99 999 99 99</a></p>
+                        <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 10px;">Відповідаємо 24/7</p>
+                    </div>
+                    <div style="background: rgba(26, 26, 26, 0.6); padding: 35px; border-radius: 15px; border: 2px solid #C0C0C0; text-align: center;">
+                        <h3 style="color: #d4af37; margin-bottom: 15px; font-size: 1.5rem;">📧 Email</h3>
+                        <p><a href="mailto:info@estatyq.ua" style="color: #E5E4E2; text-decoration: none; font-size: 1.3rem; font-weight: 600;">info@estatyq.ua</a></p>
+                        <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 10px;">Відповідь протягом 1 години</p>
+                    </div>
+                    <div style="background: rgba(26, 26, 26, 0.6); padding: 35px; border-radius: 15px; border: 2px solid #C0C0C0; text-align: center;">
+                        <h3 style="color: #d4af37; margin-bottom: 15px; font-size: 1.5rem;">📍 Адреса</h3>
+                        <p style="color: #E5E4E2; font-size: 1.2rem; font-weight: 600;">м. Київ, вул. Хрещатик, 1</p>
+                        <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 10px;">Офіс на 15 поверху</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="working-hours" style="background: rgba(26, 26, 26, 0.4); padding: 30px; border-radius: 12px; text-align: center; margin-bottom: 60px; border: 1px solid rgba(212, 175, 55, 0.2);">
+                <h3 style="color: #d4af37; margin-bottom: 20px; font-size: 1.8rem;">⏰ Години роботи</h3>
+                <p style="font-size: 1.1rem;"><strong style="color: #d4af37;">Пн-Пт:</strong> 9:00 - 18:00</p>
+                <p style="font-size: 1.1rem;"><strong style="color: #d4af37;">Сб:</strong> 10:00 - 14:00</p>
+                <p style="font-size: 1.1rem;"><strong style="color: #d4af37;">Нд:</strong> за домовленістю</p>
+            </div>
+
+            <form class="contact-form" onsubmit="handleFormSubmit(event)">
+                <h3 style="text-align: center; margin-bottom: 30px; color: #d4af37; font-size: 1.8rem;">✉️ Напишіть нам</h3>
+                
+                <div class="form-group">
+                    <label for="name">Ім'я</label>
+                    <input type="text" id="name" name="name" required placeholder="Ваше ім'я">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Телефон</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+380 (__)___ __ __">
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Тема</label>
+                    <input type="text" id="subject" name="subject" required placeholder="Тема вашого повідомлення">
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Повідомлення</label>
+                    <textarea id="message" name="message" required placeholder="Ваше повідомлення..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Відправити повідомлення</button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h4>EstatyQ</h4>
+                <p>Ваш надійний партнер у світі нерухомості</p>
+            </div>
+            <div class="footer-section">
+                <h4>Швидке Меню</h4>
+                <ul>
+                    <li><a href="../index.html">Каталог</a></li>
+                    <li><a href="about.html">Про нас</a></li>
+                    <li><a href="contact.html">Контакти</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Контакти</h4>
+                <p>+380 (44) 123-45-67</p>
+                <p>info@estatyq.ua</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 EstatyQ. Всі права захищені. | Розроблено з 💛</p>
+        </div>
+    </footer>
+
+    <div id="magnifier-cursor">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="42" cy="42" r="38" fill="none" stroke="#d4af37" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="68" y1="68" x2="88" y2="88" stroke="#d4af37" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            alert(`Дякуємо, ${name}! Ваше повідомлення отримано. Ми зв'яжемося з вами найближчим часом.`);
+            event.target.reset();
+        }
+    </script>
+</body>
+</html>

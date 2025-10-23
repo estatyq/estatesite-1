@@ -1,0 +1,49 @@
+{
+  "name": "estatyq-real-estate",
+  "version": "1.0.0",
+  "description": "EstatyQ - Premium Real Estate Agency Website. Modern, functional, and beautiful.",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "echo 'Deploy to production server'",
+    "test": "echo 'Running tests...'",
+    "lint": "echo 'Linting code...'"
+  },
+  "keywords": [
+    "real-estate",
+    "property",
+    "housing",
+    "apartment",
+    "agency",
+    "estatyq",
+    "ukraine",
+    "responsive",
+    "modern"
+  ],
+  "author": "EstatyQ Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/estatyq/website.git"
+  },
+  "homepage": "https://estatyq.ua",
+  "bugs": {
+    "url": "https://github.com/estatyq/website/issues",
+    "email": "support@estatyq.ua"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
+
