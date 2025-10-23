@@ -512,6 +512,7 @@ let filters = {
   districts: [],
   microdistricts: [],
   metro: null, // Станція метро
+  metroStations: [], // Додаємо масив станцій метро
   transaction: null,
   type: null,
   location: null,
@@ -534,8 +535,14 @@ let filters = {
   officeType: null,
   commercialType: null,
   landType: null,
-  warehouseType: null
+  warehouseType: null,
+  searchQuery: null // Додаємо пошуковий запит
 };
+
+// Глобальні змінні для нових функцій
+let currentView = 'grid'; // 'grid' або 'list'
+let currentSort = 'price-asc'; // Поточна сортировка
+let searchTimeout = null; // Для debounce пошуку
 
 // Стан для вибору типу районів/селищ
 let districtType = 'city'; // 'city' або 'region'
@@ -993,6 +1000,19 @@ function updateTableFilters() {
 
 function applyFilters() {
   let filtered = allProperties.filter(prop => {
+    // Фільтр по пошуковому запиту
+    if (filters.searchQuery) {
+      const query = filters.searchQuery;
+      const searchableText = [
+        prop.title,
+        prop.location,
+        cities[prop.city].name,
+        propertyTypes[prop.type]
+      ].join(' ').toLowerCase();
+      
+      if (!searchableText.includes(query)) return false;
+    }
+    
     // Фільтр по регіону (якщо вибран)
     if (filters.region) {
       const regionCities = Object.keys(regions[filters.region].cities);
@@ -1015,7 +1035,7 @@ function applyFilters() {
     if (filters.microdistricts.length > 0 && !filters.microdistricts.includes(prop.location)) return false;
     
     // Фільтр по станціям метро
-    if (filters.metroStations.length > 0 && (!prop.metro || !filters.metroStations.includes(prop.metro))) return false;
+    if (filters.metroStations && filters.metroStations.length > 0 && (!prop.metro || !filters.metroStations.includes(prop.metro))) return false;
     
     // ... інші фільтри (залишаємо як було)
     if (filters.location && prop.location !== filters.location) return false;
@@ -1050,43 +1070,91 @@ function applyFilters() {
 // ==================== РЕНДЕРИНГ СВОЙСТВ ====================
 
 function renderProperties() {
-  const grid = document.getElementById("properties-grid");
-  grid.innerHTML = "";
+  const container = document.getElementById("properties-grid");
+  container.innerHTML = "";
   
-  const toShow = filteredProperties.slice(0, displayedCount);
+  // Сортируем свойства
+  const sortedProperties = sortProperties(filteredProperties.slice(0, displayedCount));
   
-  if (toShow.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #d0d0d0; font-size: 18px;">По вашому запиту об\'єктів не знайдено</div>';
+  // Обновляем счетчик результатов
+  updateResultsCount();
+  
+  if (sortedProperties.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #d0d0d0; font-size: 18px;"><div style="font-size: 48px; margin-bottom: 20px;">🏠</div>По вашому запиту об\'єктів не знайдено<br><small style="color: #888; margin-top: 10px;">Спробуйте змінити параметри пошуку</small></div>';
     document.getElementById("load-more-btn").style.display = "none";
     return;
   }
   
-  toShow.forEach(prop => {
+  // Устанавливаем класс контейнера в зависимости от вида
+  container.className = currentView === 'list' ? 'properties-list' : 'properties-grid';
+  
+  sortedProperties.forEach(prop => {
     const card = document.createElement("div");
-    card.className = "property-card";
-    card.innerHTML = `
-      <div class="property-image">
-        <img src="${prop.image}" alt="${prop.title}" style="width: 100%; height: 100%; object-fit: cover;">
-        <div class="property-badge">${prop.transactionType === "sale" ? "Продаж" : "Оренда"}</div>
-      </div>
-      <div class="property-content">
-        <h3 class="property-title">${prop.title}</h3>
-        <p class="property-location">📍 ${prop.location}, ${cities[prop.city].name}</p>
-        
-        <div class="property-details">
-          ${prop.rooms > 0 ? `<div class="detail-item"><div class="detail-item-value">${prop.rooms}</div><div class="detail-item-label">Кімнат</div></div>` : ""}
-          <div class="detail-item"><div class="detail-item-value">${Math.round(prop.area)}</div><div class="detail-item-label">м²</div></div>
+    card.className = `property-card ${currentView === 'list' ? 'list-view' : ''}`;
+    
+    const badgeText = prop.transactionType === "sale" ? "Продаж" : 
+                     prop.transactionType === "rent" ? "Оренда" : "Подобово";
+    
+    const priceText = prop.transactionType === "sale" ? "тис." : 
+                     prop.transactionType === "rent" ? "тис./міс" : "грн./доба";
+    
+    if (currentView === 'list') {
+      card.innerHTML = `
+        <div class="property-image">
+          <img src="${prop.image}" alt="${prop.title}">
+          <button class="property-favorite" onclick="toggleFavorite(event, ${prop.id})">♡</button>
+          <div class="property-badge">${badgeText}</div>
         </div>
-
-        <div class="property-price">$ ${Math.round(prop.price)} ${prop.transactionType === "rent" ? "тис./міс" : "тис."}</div>
-
-        <div class="property-action">
-          <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
-          <button class="btn-like" onclick="toggleLike(event)">♡</button>
+        <div class="property-content">
+          <div class="property-info">
+            <h3 class="property-title">${prop.title}</h3>
+            <p class="property-location">${prop.location}, ${cities[prop.city].name}</p>
+            <div class="property-details">
+              ${prop.rooms > 0 ? `<div class="detail-item"><div class="detail-item-value">${prop.rooms}</div><div class="detail-item-label">кімнат</div></div>` : ""}
+              <div class="detail-item"><div class="detail-item-value">${Math.round(prop.area)}</div><div class="detail-item-label">м²</div></div>
+              ${prop.floor ? `<div class="detail-item"><div class="detail-item-value">${prop.floor}</div><div class="detail-item-label">поверх</div></div>` : ""}
+            </div>
+          </div>
+          <div class="property-price-action">
+            <div class="property-price">
+              $${Math.round(prop.price)} <span class="property-price-period">${priceText}</span>
+            </div>
+            <div class="property-action">
+              <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
+              <button class="btn-contact" onclick="openContact('${prop.city}')">📞</button>
+            </div>
+          </div>
         </div>
-      </div>
-    `;
-    grid.appendChild(card);
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="property-image">
+          <img src="${prop.image}" alt="${prop.title}">
+          <button class="property-favorite" onclick="toggleFavorite(event, ${prop.id})">♡</button>
+          <div class="property-badge">${badgeText}</div>
+        </div>
+        <div class="property-content">
+          <h3 class="property-title">${prop.title}</h3>
+          <p class="property-location">${prop.location}, ${cities[prop.city].name}</p>
+          
+          <div class="property-details">
+            ${prop.rooms > 0 ? `<div class="detail-item"><div class="detail-item-value">${prop.rooms}</div><div class="detail-item-label">кімнат</div></div>` : ""}
+            <div class="detail-item"><div class="detail-item-value">${Math.round(prop.area)}</div><div class="detail-item-label">м²</div></div>
+            ${prop.floor ? `<div class="detail-item"><div class="detail-item-value">${prop.floor}</div><div class="detail-item-label">поверх</div></div>` : ""}
+          </div>
+
+          <div class="property-price">
+            $${Math.round(prop.price)} <span class="property-price-period">${priceText}</span>
+          </div>
+
+          <div class="property-action">
+            <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
+            <button class="btn-contact" onclick="openContact('${prop.city}')">📞</button>
+          </div>
+        </div>
+      `;
+    }
+    container.appendChild(card);
   });
   
   // Показываем/скрываем кнопку "Показати ще"
@@ -1115,30 +1183,93 @@ function openModal(propId) {
   const modal = document.getElementById("modal");
   const modalBody = document.getElementById("modal-body");
   
+  const badgeText = prop.transactionType === "sale" ? "Продаж" : 
+                   prop.transactionType === "rent" ? "Оренда" : "Подобово";
+  
+  const priceText = prop.transactionType === "sale" ? "тис." : 
+                   prop.transactionType === "rent" ? "тис./міс" : "грн./доба";
+  
   modalBody.innerHTML = `
-    <h2>${prop.title}</h2>
-    <p style="color: #d0d0d0; margin-bottom: 20px; font-size: 16px;">
-      <strong style="color: #d4af37;">📍 ${prop.location}, ${cities[prop.city].name}</strong>
-    </p>
-    
-    <div class="modal-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-      <div><strong>Тип:</strong> ${propertyTypes[prop.type]}</div>
-      <div><strong>Угода:</strong> ${prop.transactionType === "sale" ? "Продаж" : "Оренда"}</div>
-      <div><strong>Ціна:</strong> $ ${Math.round(prop.price)}</div>
-      ${prop.rooms > 0 ? `<div><strong>Кімнат:</strong> ${prop.rooms}</div>` : ""}
-      <div><strong>Площа:</strong> ${Math.round(prop.area)} м²</div>
-      <div><strong>Поверх:</strong> ${prop.floor}</div>
-      <div><strong>Рік:</strong> ${prop.building}</div>
+    <div style="display: flex; gap: 30px; margin-bottom: 30px;">
+      <div style="flex: 1; min-width: 300px;">
+        <img src="${prop.image}" alt="${prop.title}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3);">
+      </div>
+      <div style="flex: 1;">
+        <div style="display: inline-block; background: linear-gradient(135deg, var(--gold-color), var(--gold-hover)); color: #0a0a0a; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px;">
+          ${badgeText}
+        </div>
+        <h2 style="margin-bottom: 10px; font-size: 1.8rem;">${prop.title}</h2>
+        <p style="color: #d0d0d0; margin-bottom: 20px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+          📍 <strong style="color: #d4af37;">${prop.location}, ${cities[prop.city].name}</strong>
+        </p>
+        
+        <div style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, var(--gold-color), var(--gold-hover)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px;">
+          $${Math.round(prop.price)} <span style="font-size: 1rem; color: #888; font-weight: 400;">${priceText}</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px;">
+          <div style="background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(212, 175, 55, 0.2);">
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--gold-color);">${propertyTypes[prop.type]}</div>
+            <div style="font-size: 0.9rem; color: #888; text-transform: uppercase;">Тип</div>
+          </div>
+          ${prop.rooms > 0 ? `
+          <div style="background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(212, 175, 55, 0.2);">
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--gold-color);">${prop.rooms}</div>
+            <div style="font-size: 0.9rem; color: #888; text-transform: uppercase;">Кімнат</div>
+          </div>` : ""}
+          <div style="background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(212, 175, 55, 0.2);">
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--gold-color);">${Math.round(prop.area)}</div>
+            <div style="font-size: 0.9rem; color: #888; text-transform: uppercase;">м²</div>
+          </div>
+          ${prop.floor ? `
+          <div style="background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(212, 175, 55, 0.2);">
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--gold-color);">${prop.floor}</div>
+            <div style="font-size: 0.9rem; color: #888; text-transform: uppercase;">Поверх</div>
+          </div>` : ""}
+          ${prop.building ? `
+          <div style="background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(212, 175, 55, 0.2);">
+            <div style="font-size: 1.4rem; font-weight: 700; color: var(--gold-color);">${prop.building}</div>
+            <div style="font-size: 0.9rem; color: #888; text-transform: uppercase;">Рік</div>
+          </div>` : ""}
+        </div>
+      </div>
     </div>
     
-    <div style="margin-top: 30px; text-align: center;">
-      <a href="${cities[prop.city].bot}" target="_blank" class="btn btn-primary" style="display: inline-block;">
-        Написати в Telegram
+    ${generateAdditionalInfo(prop)}
+    
+    <div style="display: flex; gap: 15px; margin-top: 30px; justify-content: center; flex-wrap: wrap;">
+      <a href="${cities[prop.city].bot}" target="_blank" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none;">
+        📱 Написати в Telegram
       </a>
+      <button class="btn btn-secondary" onclick="toggleFavorite(event, ${prop.id})" style="display: inline-flex; align-items: center; gap: 10px;">
+        ♡ Додати в обране
+      </button>
     </div>
   `;
   
   modal.style.display = "block";
+}
+
+function generateAdditionalInfo(prop) {
+  let additionalInfo = '';
+  
+  if (prop.transactionType === 'rent') {
+    additionalInfo += '<div style="margin-top: 25px; padding: 20px; background: rgba(26, 26, 26, 0.8); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.2);"><h3 style="margin-bottom: 15px; color: var(--gold-color);">Додаткові зручності</h3><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">';
+    
+    if (prop.pets) additionalInfo += `<div>🐕 Домашні тварини: <strong>${prop.pets}</strong></div>`;
+    if (prop.waterHeater) additionalInfo += `<div>🚿 Водонагрівач: <strong>${prop.waterHeater}</strong></div>`;
+    if (prop.microwave) additionalInfo += `<div>📱 Мікрохвильова: <strong>${prop.microwave}</strong></div>`;
+    if (prop.oven) additionalInfo += `<div>🔥 Духовка: <strong>${prop.oven}</strong></div>`;
+    if (prop.monthlyRent) additionalInfo += `<div>📅 Можна на 1-2 місяці: <strong>Так</strong></div>`;
+    
+    additionalInfo += '</div></div>';
+  }
+  
+  if (prop.plotArea) {
+    additionalInfo += `<div style="margin-top: 20px; padding: 15px; background: rgba(212, 175, 55, 0.1); border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.2);"><strong>🌳 Ділянка:</strong> ${prop.plotArea} соток</div>`;
+  }
+  
+  return additionalInfo;
 }
 
 function closeModal() {
@@ -1166,10 +1297,192 @@ function updateTelegramButton() {
   }
 }
 
+// ==================== НОВІ ФУНКЦІЇ ====================
+
+// Сортировка объектов
+function sortProperties(properties) {
+  const [field, direction] = currentSort.split('-');
+  
+  return properties.sort((a, b) => {
+    let aVal, bVal;
+    
+    switch(field) {
+      case 'price':
+        aVal = a.price;
+        bVal = b.price;
+        break;
+      case 'area':
+        aVal = a.area;
+        bVal = b.area;
+        break;
+      case 'date':
+        aVal = a.id; // Используем ID как дату
+        bVal = b.id;
+        break;
+      default:
+        return 0;
+    }
+    
+    if (direction === 'asc') {
+      return aVal - bVal;
+    } else {
+      return bVal - aVal;
+    }
+  });
+}
+
+// Переключение вида отображения
+function setView(view) {
+  currentView = view;
+  
+  // Обновляем активные кнопки
+  document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(view + '-view').classList.add('active');
+  
+  // Перерендериваем объекты
+  renderProperties();
+}
+
+// Обновление счетчика результатов
+function updateResultsCount() {
+  const countElement = document.getElementById('results-count');
+  if (countElement) {
+    countElement.textContent = filteredProperties.length.toLocaleString();
+  }
+}
+
+// Умный поиск
+function initSmartSearch() {
+  const searchInput = document.getElementById('smart-search');
+  const suggestionsContainer = document.getElementById('search-suggestions');
+  
+  if (!searchInput) return;
+  
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    
+    // Debounce поиска
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      if (query.length >= 2) {
+        showSearchSuggestions(query);
+        performSearch(query);
+      } else {
+        hideSuggestions();
+        filters.searchQuery = null;
+        applyFilters();
+      }
+    }, 300);
+  });
+  
+  // Скрываем подсказки при клике вне
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.smart-search-container')) {
+      hideSuggestions();
+    }
+  });
+}
+
+function showSearchSuggestions(query) {
+  const suggestionsContainer = document.getElementById('search-suggestions');
+  if (!suggestionsContainer) return;
+  
+  const suggestions = generateSuggestions(query);
+  
+  if (suggestions.length === 0) {
+    hideSuggestions();
+    return;
+  }
+  
+  suggestionsContainer.innerHTML = suggestions.map(suggestion => 
+    `<div class="search-suggestion" onclick="selectSuggestion('${suggestion}')">${suggestion}</div>`
+  ).join('');
+  
+  suggestionsContainer.style.display = 'block';
+}
+
+function hideSuggestions() {
+  const suggestionsContainer = document.getElementById('search-suggestions');
+  if (suggestionsContainer) {
+    suggestionsContainer.style.display = 'none';
+  }
+}
+
+function generateSuggestions(query) {
+  const suggestions = new Set();
+  const lowerQuery = query.toLowerCase();
+  
+  // Поиск по городам
+  Object.values(cities).forEach(city => {
+    if (city.name.toLowerCase().includes(lowerQuery)) {
+      suggestions.add(city.name);
+    }
+  });
+  
+  // Поиск по районам
+  Object.values(locations).flat().forEach(location => {
+    if (location.toLowerCase().includes(lowerQuery)) {
+      suggestions.add(location);
+    }
+  });
+  
+  // Поиск по типам недвижимости
+  Object.values(propertyTypes).forEach(type => {
+    if (type.toLowerCase().includes(lowerQuery)) {
+      suggestions.add(type);
+    }
+  });
+  
+  return Array.from(suggestions).slice(0, 5);
+}
+
+function selectSuggestion(suggestion) {
+  document.getElementById('smart-search').value = suggestion;
+  performSearch(suggestion);
+  hideSuggestions();
+}
+
+function performSearch(query) {
+  filters.searchQuery = query.toLowerCase();
+  displayedCount = 12;
+  applyFilters();
+}
+
+// Открытие контакта
+function openContact(cityKey) {
+  const city = cities[cityKey];
+  if (city && city.bot) {
+    window.open(city.bot, '_blank');
+  }
+}
+
+// Переключение избранного
+function toggleFavorite(event, propId) {
+  event.stopPropagation();
+  const btn = event.target;
+  
+  if (btn.textContent === "♡") {
+    btn.textContent = "♥";
+    btn.classList.add('active');
+    // Здесь можно добавить логику сохранения в localStorage
+  } else {
+    btn.textContent = "♡";
+    btn.classList.remove('active');
+  }
+}
+
+// Переключение фильтров на мобильных
+function toggleFilters() {
+  const sidebar = document.querySelector('.filters-sidebar');
+  if (sidebar) {
+    sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
 // ==================== ДОПОМІЖНІ ФУНКЦІЇ ====================
 
 function toggleLike(event) {
-  event.target.textContent = event.target.textContent === "♡" ? "♥" : "♡";
+  toggleFavorite(event, 0); // Совместимость со старым кодом
 }
 
 function resetFilters() {
@@ -1231,7 +1544,53 @@ document.addEventListener("DOMContentLoaded", function() {
   
   // Добавляем слушатели для быстрых фильтров вверху
   setupQuickFilters();
+  
+  // Инициализируем новые функции
+  initSmartSearch();
+  initSortControls();
+  initResponsiveFilters();
+  
+  // Обновляем статистику
+  updateCatalogStats();
 });
+
+// ==================== ИНИЦИАЛИЗАЦИЯ НОВЫХ ФУНКЦИЙ ====================
+
+function initSortControls() {
+  const sortSelect = document.getElementById('sort-select');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      renderProperties();
+    });
+  }
+}
+
+function initResponsiveFilters() {
+  // Показываем/скрываем компактные фильтры на мобильных
+  function checkScreenSize() {
+    const filtersCompact = document.getElementById('filters-compact');
+    const filtersSidebar = document.querySelector('.filters-sidebar');
+    
+    if (window.innerWidth <= 1024) {
+      if (filtersCompact) filtersCompact.style.display = 'block';
+      if (filtersSidebar) filtersSidebar.style.display = 'none';
+    } else {
+      if (filtersCompact) filtersCompact.style.display = 'none';
+      if (filtersSidebar) filtersSidebar.style.display = 'block';
+    }
+  }
+  
+  checkScreenSize();
+  window.addEventListener('resize', checkScreenSize);
+}
+
+function updateCatalogStats() {
+  const totalElement = document.getElementById('total-properties');
+  if (totalElement) {
+    totalElement.textContent = allProperties.length.toLocaleString();
+  }
+}
 
 // ==================== БЫСТРЫЕ ФИЛЬТРЫ ВВЕРХУ ====================
 

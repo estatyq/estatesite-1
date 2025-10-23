@@ -38,6 +38,29 @@
             <div class="catalog-header">
                 <h2>Каталог Нерухомості</h2>
                 <p>Знайдіть ідеальну нерухомість для вас</p>
+                
+                <!-- Статистика каталога -->
+                <div class="catalog-stats">
+                    <div class="catalog-stat">
+                        <div class="catalog-stat-value" id="total-properties">2,847</div>
+                        <div class="catalog-stat-label">Об'єктів</div>
+                    </div>
+                    <div class="catalog-stat">
+                        <div class="catalog-stat-value">7</div>
+                        <div class="catalog-stat-label">Міст</div>
+                    </div>
+                    <div class="catalog-stat">
+                        <div class="catalog-stat-value">156</div>
+                        <div class="catalog-stat-label">Районів</div>
+                    </div>
+                </div>
+                
+                <!-- Умный поиск -->
+                <div class="smart-search-container">
+                    <input type="text" class="smart-search" id="smart-search" placeholder="Пошук за адресою, районом, типом нерухомості...">
+                    <span class="search-icon">🔍</span>
+                    <div class="search-suggestions" id="search-suggestions"></div>
+                </div>
             </div>
 
             <!-- ГОРИЗОНТАЛЬНОЕ МЕНЮ С БЫСТРЫМИ ФИЛЬТРАМИ -->
@@ -72,6 +95,11 @@
 
                 <!-- Центральная колонка - Таблица и объекты -->
                 <div class="catalog-content">
+                    <!-- Компактные фильтры для мобильных -->
+                    <div class="filters-compact" id="filters-compact">
+                        <button class="filters-toggle" onclick="toggleFilters()">Фільтри</button>
+                    </div>
+                    
                     <!-- Таблица фильтров (районы, комнаты, площа) -->
                     <div class="filters-table" id="filters-table-container" style="display: none;"></div>
 
@@ -126,6 +154,28 @@
 
                     <!-- Telegram Кнопка -->
                     <div id="telegram-button" style="display: none; text-align: center; margin-bottom: 30px;"></div>
+
+                    <!-- Контролы каталога -->
+                    <div class="catalog-controls">
+                        <div class="results-info">
+                            Знайдено: <span class="results-count" id="results-count">0</span> об'єктів
+                        </div>
+                        <div class="sort-controls">
+                            <span class="sort-label">Сортувати:</span>
+                            <select class="sort-select" id="sort-select">
+                                <option value="price-asc">Ціна: від дешевих</option>
+                                <option value="price-desc">Ціна: від дорогих</option>
+                                <option value="area-desc">Площа: від більших</option>
+                                <option value="area-asc">Площа: від менших</option>
+                                <option value="date-desc">Нові спочатку</option>
+                                <option value="date-asc">Старі спочатку</option>
+                            </select>
+                            <div class="view-toggle">
+                                <button class="view-btn active" id="grid-view" onclick="setView('grid')">⊞</button>
+                                <button class="view-btn" id="list-view" onclick="setView('list')">☰</button>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Каталог об'єктів -->
                     <div class="properties-grid" id="properties-grid"></div>
