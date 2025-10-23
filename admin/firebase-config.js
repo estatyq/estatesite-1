@@ -1,17 +1,29 @@
-// Firebase конфігурація
-// Ваші дані з Firebase Console
+// Firebase конфігурація для EstatyQ
+// ⚠️ ЗАМІНІТЬ ЦІ ДАНІ НА СВОЇ З FIREBASE CONSOLE
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDTL8LQhb8IY3bdDSxMOfYn2cnMTgW5xL8",
-    authDomain: "devsite-7f0f5.firebaseapp.com",
-    projectId: "devsite-7f0f5",
-    storageBucket: "devsite-7f0f5.firebasestorage.app",
-    messagingSenderId: "412781862441",
-    appId: "1:412781862441:web:99caf6718bf59340a30638",
-    measurementId: "G-F7804VQC4V",
-    databaseURL: "https://devsite-7f0f5-default-rtdb.europe-west1.firebasedatabase.app"
+    apiKey: "YOUR_API_KEY_HERE",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.YOUR_REGION.firebasedatabase.app"
 };
 
-// ⚠️ ВАЖЛИВО: Не публікуйте цей файл в публічних Git репозиторіях!
-// Файл вже додано в .gitignore
-
+// ==================== ІНСТРУКЦІЯ ====================
+// 
+// 1. Перейдіть на https://console.firebase.google.com/
+// 2. Створіть новий проект або виберіть існуючий
+// 3. У налаштуваннях проекту знайдіть "Your apps" → "Web app"
+// 4. Скопіюйте конфігурацію та замініть дані вище
+// 5. Увімкніть такі сервіси:
+//    - Authentication → Email/Password
+//    - Realtime Database → Create Database
+//    - Storage → Get Started
+//
+// ⚠️ ВАЖЛИВО: Додайте цей файл в .gitignore!
+// ⚠️ НЕ публікуйте API ключі в публічних репозиторіях!
+//
+// ====================================================
