@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EstatyQ - Демо Каталога</title>
+    <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/catalog.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .demo-header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            padding: var(--spacing-2xl) 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border-primary);
+        }
+        
+        .demo-header h1 {
+            font-size: 3rem;
+            color: var(--primary-gold);
+            margin-bottom: var(--spacing-md);
+            font-weight: 800;
+        }
+        
+        .demo-header p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .demo-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+            padding: var(--spacing-2xl) 0;
+        }
+        
+        .demo-feature {
+            background: var(--bg-card);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-secondary);
+            text-align: center;
+            transition: all var(--transition-normal);
+        }
+        
+        .demo-feature:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-gold);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .demo-feature i {
+            font-size: 3rem;
+            color: var(--primary-gold);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .demo-feature h3 {
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .demo-feature p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .demo-cta {
+            text-align: center;
+            padding: var(--spacing-2xl) 0;
+            background: var(--bg-primary);
+        }
+        
+        .demo-cta h2 {
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .demo-cta p {
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xl);
+            font-size: 1.125rem;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            gap: var(--spacing-lg);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .demo-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            padding: var(--spacing-2xl) 0;
+            background: var(--bg-secondary);
+        }
+        
+        .demo-stat {
+            text-align: center;
+            padding: var(--spacing-lg);
+        }
+        
+        .demo-stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .demo-stat-label {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навігація -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="обрезаный_логотип-removebg-preview.png" alt="ESTATYQ" class="logo-icon-image"/>
+                <div class="logo-text">
+                    <h1>ESTATYQ</h1>
+                    <p class="logo-tagline">МРІЯ СТАЄ РЕАЛЬНІСТЮ</p>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="catalog.html" class="active">Каталог</a></li>
+                <li><a href="pages/landing.html">Про нас</a></li>
+                <li><a href="pages/content.html">Контент</a></li>
+                <li><a href="pages/contact.html">Контакти</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Демо заголовок -->
+    <section class="demo-header">
+        <div class="container">
+            <h1>🏠 Ідеальний Каталог Нерухомості</h1>
+            <p>Сучасний, інтуїтивно зрозумілий інтерфейс для пошуку нерухомості</p>
+        </div>
+    </section>
+
+    <!-- Статистика -->
+    <section class="demo-stats">
+        <div class="container">
+            <div class="demo-stat">
+                <div class="demo-stat-value">10,000+</div>
+                <div class="demo-stat-label">Об'єктів нерухомості</div>
+            </div>
+            <div class="demo-stat">
+                <div class="demo-stat-value">7</div>
+                <div class="demo-stat-label">Міст України</div>
+            </div>
+            <div class="demo-stat">
+                <div class="demo-stat-value">6</div>
+                <div class="demo-stat-label">Типів нерухомості</div>
+            </div>
+            <div class="demo-stat">
+                <div class="demo-stat-value">100%</div>
+                <div class="demo-stat-label">Адаптивний дизайн</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Особливості -->
+    <section class="demo-features">
+        <div class="container">
+            <div class="demo-feature">
+                <i class="fas fa-search"></i>
+                <h3>Розумний пошук</h3>
+                <p>Повнотекстовий пошук по назві, району, вулиці та станції метро з автодоповненням та історією пошуку</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-filter"></i>
+                <h3>Продвинуті фільтри</h3>
+                <p>Детальні фільтри по типу, географії, характеристикам та додатковим опціям з збереженням налаштувань</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>Мобільна оптимізація</h3>
+                <p>Повністю адаптивний дизайн з touch-friendly інтерфейсом та оптимізованою продуктивністю</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-heart"></i>
+                <h3>Особистий кабінет</h3>
+                <p>Збереження обраних об'єктів, історія пошуку та персоналізовані рекомендації</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-palette"></i>
+                <h3>Сучасний дизайн</h3>
+                <p>Елегантна срібно-золота палітра з плавними анімаціями та інтуїтивною навігацією</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-rocket"></i>
+                <h3>Висока продуктивність</h3>
+                <p>Швидка завантаження, оптимізовані запити та ефективне керування пам'яттю</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Призыв к действию -->
+    <section class="demo-cta">
+        <div class="container">
+            <h2>Готові спробувати?</h2>
+            <p>Перегляньте повнофункціональний каталог нерухомості з усіма можливостями</p>
+            <div class="demo-buttons">
+                <a href="catalog.html" class="btn btn-primary">
+                    <i class="fas fa-external-link-alt"></i>
+                    Відкрити каталог
+                </a>
+                <a href="#features" class="btn btn-secondary">
+                    <i class="fas fa-info-circle"></i>
+                    Дізнатися більше
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Детальні особливості -->
+    <section id="features" class="demo-features">
+        <div class="container">
+            <div class="demo-feature">
+                <i class="fas fa-map-marker-alt"></i>
+                <h3>Географічні фільтри</h3>
+                <p>Пошук по містах, районах, мікрорайонах та станціях метро з інтерактивними чіпсами</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-sort-amount-down"></i>
+                <h3>Розумна сортування</h3>
+                <p>Сортування по ціні, площі, даті додавання з підтримкою зростання та спадання</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-th-large"></i>
+                <h3>Гнучкий перегляд</h3>
+                <p>Переключення між сітковим та списковим видом для зручного перегляду результатів</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-bell"></i>
+                <h3>Сповіщення</h3>
+                <p>Інтуїтивні сповіщення про дії користувача з анімованими ефектами</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-chart-line"></i>
+                <h3>Аналітика</h3>
+                <p>Відстеження дій користувачів для покращення сервісу та персоналізації</p>
+            </div>
+            
+            <div class="demo-feature">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Безпека</h3>
+                <p>Безпечне зберігання даних користувачів з використанням localStorage</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h4>EstatyQ</h4>
+                <p>Ваш надійний партнер у світі нерухомості</p>
+            </div>
+            <div class="footer-section">
+                <h4>Швидке Меню</h4>
+                <ul>
+                    <li><a href="catalog.html">Каталог</a></li>
+                    <li><a href="pages/landing.html">Про нас</a></li>
+                    <li><a href="pages/content.html">Контент</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Контакти</h4>
+                <p>+380 (44) 123-45-67</p>
+                <p>info@estatyq.ua</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 EstatyQ. Всі права захищені. | Розроблено з 💛</p>
+        </div>
+    </footer>
+
+    <script>
+        // Плавная прокрутка для якорных ссылок
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Анимация появления элементов при прокрутке
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+                }
+            });
+        }, observerOptions);
+
+        // Наблюдаем за элементами
+        document.querySelectorAll('.demo-feature, .demo-stat').forEach(el => {
+            el.style.opacity = '0';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

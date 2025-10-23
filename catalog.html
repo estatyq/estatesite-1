@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EstatyQ - Каталог Нерухомості</title>
+    <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/catalog.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Навігація -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="обрезаный_логотип-removebg-preview.png" alt="ESTATYQ" class="logo-icon-image"/>
+                <div class="logo-text">
+                    <h1>ESTATYQ</h1>
+                    <p class="logo-tagline">МРІЯ СТАЄ РЕАЛЬНІСТЮ</p>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="catalog.html" class="active">Каталог</a></li>
+                <li><a href="pages/landing.html">Про нас</a></li>
+                <li><a href="pages/content.html">Контент</a></li>
+                <li><a href="pages/contact.html">Контакти</a></li>
+                <li class="nav-transaction-tabs">
+                    <button class="nav-transaction-btn active" data-transaction="sale">Продаж</button>
+                    <button class="nav-transaction-btn" data-transaction="rent">Оренда</button>
+                    <button class="nav-transaction-btn" data-transaction="daily">Подобово</button>
+                </li>
+            </ul>
+            <div class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Пошук та фільтри -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-header">
+                <h2>Знайдіть ідеальну нерухомість</h2>
+                <p>Більше 10,000 об'єктів по всій Україні</p>
+            </div>
+
+            <!-- Головний пошук -->
+            <div class="main-search">
+                <div class="search-input-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="main-search" placeholder="Введіть назву району, вулиці або станції метро...">
+                    <button class="search-btn">Пошук</button>
+                </div>
+            </div>
+
+            <!-- Швидкі фільтри -->
+            <div class="quick-filters">
+                <div class="filter-group">
+                    <h4>Тип нерухомості</h4>
+                    <div class="filter-chips">
+                        <button class="filter-chip active" data-type="apartment">
+                            <i class="fas fa-building"></i>
+                            Квартира
+                        </button>
+                        <button class="filter-chip" data-type="house">
+                            <i class="fas fa-home"></i>
+                            Будинок
+                        </button>
+                        <button class="filter-chip" data-type="commercial">
+                            <i class="fas fa-store"></i>
+                            Комерція
+                        </button>
+                        <button class="filter-chip" data-type="office">
+                            <i class="fas fa-briefcase"></i>
+                            Офіс
+                        </button>
+                        <button class="filter-chip" data-type="land">
+                            <i class="fas fa-tree"></i>
+                            Земля
+                        </button>
+                        <button class="filter-chip" data-type="warehouse">
+                            <i class="fas fa-warehouse"></i>
+                            Склад
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Місто</h4>
+                    <div class="city-selector">
+                        <select id="city-select">
+                            <option value="">Всі міста</option>
+                            <option value="kyiv">Київ</option>
+                            <option value="kharkiv">Харків</option>
+                            <option value="odesa">Одеса</option>
+                            <option value="lviv">Львів</option>
+                            <option value="dnipro">Дніпро</option>
+                            <option value="zaporizhzhia">Запоріжжя</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Ціна</h4>
+                    <div class="price-range">
+                        <input type="number" id="price-min" placeholder="Від">
+                        <span>-</span>
+                        <input type="number" id="price-max" placeholder="До">
+                        <select id="price-currency">
+                            <option value="usd">USD</option>
+                            <option value="uah">UAH</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Площа</h4>
+                    <div class="area-range">
+                        <input type="number" id="area-min" placeholder="Від м²">
+                        <span>-</span>
+                        <input type="number" id="area-max" placeholder="До м²">
+                    </div>
+                </div>
+
+                <button class="advanced-filters-btn">
+                    <i class="fas fa-sliders-h"></i>
+                    Розширені фільтри
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Розширені фільтри -->
+    <section class="advanced-filters" id="advanced-filters">
+        <div class="container">
+            <div class="filters-grid">
+                <div class="filter-section">
+                    <h4>Район</h4>
+                    <div class="district-chips" id="district-chips"></div>
+                </div>
+
+                <div class="filter-section">
+                    <h4>Метро</h4>
+                    <div class="metro-selector">
+                        <select id="metro-line">
+                            <option value="">Виберіть лінію</option>
+                        </select>
+                        <select id="metro-station">
+                            <option value="">Виберіть станцію</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4>Кімнати</h4>
+                    <div class="rooms-selector">
+                        <button class="room-btn" data-rooms="1">1</button>
+                        <button class="room-btn" data-rooms="2">2</button>
+                        <button class="room-btn" data-rooms="3">3</button>
+                        <button class="room-btn" data-rooms="4">4</button>
+                        <button class="room-btn" data-rooms="5">5+</button>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4>Поверх</h4>
+                    <div class="floor-range">
+                        <input type="number" id="floor-min" placeholder="Від">
+                        <span>-</span>
+                        <input type="number" id="floor-max" placeholder="До">
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4>Рік будівництва</h4>
+                    <div class="year-range">
+                        <input type="number" id="year-min" placeholder="Від">
+                        <span>-</span>
+                        <input type="number" id="year-max" placeholder="До">
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4>Додаткові опції</h4>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="balcony">
+                            <span class="checkmark"></span>
+                            Балкон
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="parking">
+                            <span class="checkmark"></span>
+                            Паркінг
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="elevator">
+                            <span class="checkmark"></span>
+                            Ліфт
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="furnished">
+                            <span class="checkmark"></span>
+                            Мебльований
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filters-actions">
+                <button class="btn-secondary" onclick="clearAllFilters()">
+                    <i class="fas fa-times"></i>
+                    Очистити все
+                </button>
+                <button class="btn-primary" onclick="applyFilters()">
+                    <i class="fas fa-search"></i>
+                    Застосувати фільтри
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Результати пошуку -->
+    <section class="results-section">
+        <div class="container">
+            <div class="results-header">
+                <div class="results-info">
+                    <h3>Знайдено об'єктів: <span id="results-count">0</span></h3>
+                    <p id="search-query"></p>
+                </div>
+                <div class="sort-options">
+                    <select id="sort-by">
+                        <option value="price-asc">Ціна: від дешевих</option>
+                        <option value="price-desc">Ціна: від дорогих</option>
+                        <option value="area-asc">Площа: від менших</option>
+                        <option value="area-desc">Площа: від більших</option>
+                        <option value="newest">Найновіші</option>
+                        <option value="oldest">Найстаріші</option>
+                    </select>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Картки нерухомості -->
+            <div class="properties-container" id="properties-container">
+                <div class="properties-grid" id="properties-grid">
+                    <!-- Картки будуть додані через JavaScript -->
+                </div>
+            </div>
+
+            <!-- Пагінація -->
+            <div class="pagination" id="pagination">
+                <!-- Кнопки пагінації будуть додані через JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Модальне вікно деталей -->
+    <div id="property-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Деталі об'єкта будуть додані через JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">Закрити</button>
+                <button class="btn-primary" id="contact-btn">
+                    <i class="fas fa-phone"></i>
+                    Зв'язатися
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h4>EstatyQ</h4>
+                <p>Ваш надійний партнер у світі нерухомості</p>
+            </div>
+            <div class="footer-section">
+                <h4>Швидке Меню</h4>
+                <ul>
+                    <li><a href="catalog.html">Каталог</a></li>
+                    <li><a href="pages/landing.html">Про нас</a></li>
+                    <li><a href="pages/content.html">Контент</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Контакти</h4>
+                <p>+380 (44) 123-45-67</p>
+                <p>info@estatyq.ua</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 EstatyQ. Всі права захищені. | Розроблено з 💛</p>
+        </div>
+    </footer>
+
+    <script src="js/catalog.js"></script>
+    <script src="js/catalog-utils.js"></script>
+</body>
+</html>
