@@ -1043,14 +1043,36 @@ function applyFilters() {
   });
 
   displayedCount = 12;
-  renderProperties(filtered);
   filteredProperties = filtered;
+  
+  // Показываем скелетоны загрузки
+  renderProperties(true);
+  
+  // Имитируем загрузку для лучшего UX
+  setTimeout(() => {
+    applySorting();
+    renderProperties();
+    
+    // Показываем уведомление о результатах
+    const count = filtered.length;
+    if (count === 0) {
+      showNotification('По вашему запросу ничего не найдено', 'warning');
+    } else {
+      showNotification(`Найдено ${count} объектов`, 'success');
+    }
+  }, 300);
 }
 
 // ==================== РЕНДЕРИНГ СВОЙСТВ ====================
 
-function renderProperties() {
+function renderProperties(showSkeleton = false) {
   const grid = document.getElementById("properties-grid");
+  
+  if (showSkeleton) {
+    createSkeletonCards(6);
+    return;
+  }
+  
   grid.innerHTML = "";
   
   const toShow = filteredProperties.slice(0, displayedCount);
@@ -1058,6 +1080,7 @@ function renderProperties() {
   if (toShow.length === 0) {
     grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #d0d0d0; font-size: 18px;">По вашому запиту об\'єктів не знайдено</div>';
     document.getElementById("load-more-btn").style.display = "none";
+    updateStats();
     return;
   }
   
@@ -1096,6 +1119,8 @@ function renderProperties() {
   } else {
     btn.style.display = "block";
   }
+  
+  updateStats();
 }
 
 function loadMoreProperties() {
@@ -1164,6 +1189,669 @@ function updateTelegramButton() {
   } else {
     telegramBtn.style.display = "none";
   }
+}
+
+// ==================== УВЕДОМЛЕНИЯ И ИНДИКАТОРЫ ====================
+
+function showNotification(message, type = 'info', duration = 3000) {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  // Анимация появления
+  setTimeout(() => notification.classList.add('show'), 100);
+  
+  // Автоматическое скрытие
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => document.body.removeChild(notification), 300);
+  }, duration);
+}
+
+function showLoadingOverlay(message = 'Загрузка...') {
+  const overlay = document.createElement('div');
+  overlay.className = 'loading-overlay';
+  overlay.innerHTML = `
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">${message}</div>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+function hideLoadingOverlay(overlay) {
+  if (overlay && overlay.parentNode) {
+    overlay.parentNode.removeChild(overlay);
+  }
+}
+
+function createSkeletonCards(count = 6) {
+  const grid = document.getElementById('properties-grid');
+  grid.innerHTML = '';
+  
+  for (let i = 0; i < count; i++) {
+    const skeleton = document.createElement('div');
+    skeleton.className = 'skeleton-card';
+    skeleton.innerHTML = `
+      <div class="skeleton-image"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-location"></div>
+        <div class="skeleton-details">
+          <div class="skeleton-detail"></div>
+          <div class="skeleton-detail"></div>
+        </div>
+        <div class="skeleton-price"></div>
+        <div class="skeleton-buttons">
+          <div class="skeleton-button"></div>
+          <div class="skeleton-button"></div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(skeleton);
+  }
+}
+
+// ==================== ХЛЕБНЫЕ КРОШКИ ====================
+
+function updateBreadcrumbs() {
+  const breadcrumbsContainer = document.querySelector('.breadcrumbs');
+  if (!breadcrumbsContainer) return;
+  
+  const currentCity = cities[filters.city]?.name || 'Все города';
+  const currentDistrict = filters.district || 'Все районы';
+  const currentTransaction = filters.transaction === 'sale' ? 'Продаж' : 
+                           filters.transaction === 'rent' ? 'Оренда' : 'Подобово';
+  
+  breadcrumbsContainer.innerHTML = `
+    <a href="#" class="breadcrumb-item" onclick="resetFilters()">Главная</a>
+    <span class="breadcrumb-separator">›</span>
+    <a href="#" class="breadcrumb-item" onclick="selectCity(${filters.city})">${currentCity}</a>
+    <span class="breadcrumb-separator">›</span>
+    <a href="#" class="breadcrumb-item" onclick="selectDistrict('${filters.district}')">${currentDistrict}</a>
+    <span class="breadcrumb-separator">›</span>
+    <span class="breadcrumb-current">${currentTransaction}</span>
+  `;
+}
+
+function resetFilters() {
+  filters = {
+    city: 1,
+    district: null,
+    microdistrict: null,
+    metro: null,
+    transaction: 'sale',
+    propertyType: null,
+    priceMin: null,
+    priceMax: null,
+    areaMin: null,
+    areaMax: null
+  };
+  
+  updateTableFilters();
+  applyFilters();
+  updateBreadcrumbs();
+  showNotification('Фильтры сброшены', 'info');
+}
+
+// ==================== СОРТИРОВКА ====================
+
+let sortBy = 'price';
+let sortOrder = 'asc';
+
+function addSortControls() {
+  const catalogContent = document.querySelector('.catalog-content');
+  if (!catalogContent) return;
+  
+  const sortControls = document.createElement('div');
+  sortControls.className = 'sort-controls';
+  sortControls.innerHTML = `
+    <span class="sort-label">Сортировать по:</span>
+    <select class="sort-select" onchange="changeSortBy(this.value)">
+      <option value="price">Цене</option>
+      <option value="area">Площади</option>
+      <option value="rooms">Количеству комнат</option>
+      <option value="title">Названию</option>
+    </select>
+    <div class="sort-buttons">
+      <button class="sort-btn ${sortOrder === 'asc' ? 'active' : ''}" onclick="changeSortOrder('asc')">↑</button>
+      <button class="sort-btn ${sortOrder === 'desc' ? 'active' : ''}" onclick="changeSortOrder('desc')">↓</button>
+    </div>
+  `;
+  
+  catalogContent.insertBefore(sortControls, catalogContent.querySelector('#properties-grid'));
+}
+
+function changeSortBy(value) {
+  sortBy = value;
+  applySorting();
+  showNotification(`Сортировка по ${getSortLabel(value)}`, 'info');
+}
+
+function changeSortOrder(order) {
+  sortOrder = order;
+  applySorting();
+  
+  // Обновляем активные кнопки
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  document.querySelector(`.sort-btn[onclick="changeSortOrder('${order}')"]`).classList.add('active');
+}
+
+function getSortLabel(value) {
+  const labels = {
+    price: 'цене',
+    area: 'площади',
+    rooms: 'количеству комнат',
+    title: 'названию'
+  };
+  return labels[value] || value;
+}
+
+function applySorting() {
+  if (!filteredProperties) return;
+  
+  filteredProperties.sort((a, b) => {
+    let aValue, bValue;
+    
+    switch (sortBy) {
+      case 'price':
+        aValue = a.price;
+        bValue = b.price;
+        break;
+      case 'area':
+        aValue = a.area;
+        bValue = b.area;
+        break;
+      case 'rooms':
+        aValue = a.rooms || 0;
+        bValue = b.rooms || 0;
+        break;
+      case 'title':
+        aValue = a.title.toLowerCase();
+        bValue = b.title.toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+    
+    if (sortBy === 'title') {
+      return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    } else {
+      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+  });
+  
+  renderProperties();
+}
+
+// ==================== СТАТИСТИКА ====================
+
+function addStatsBar() {
+  const catalogContent = document.querySelector('.catalog-content');
+  if (!catalogContent) return;
+  
+  const statsBar = document.createElement('div');
+  statsBar.className = 'stats-bar';
+  statsBar.innerHTML = `
+    <div class="stats-item">
+      <div class="stats-number" id="total-properties">0</div>
+      <div class="stats-label">Всего объектов</div>
+    </div>
+    <div class="stats-item">
+      <div class="stats-number" id="filtered-properties">0</div>
+      <div class="stats-label">Найдено</div>
+    </div>
+    <div class="stats-item">
+      <div class="stats-number" id="avg-price">0</div>
+      <div class="stats-label">Средняя цена</div>
+    </div>
+    <div class="stats-item">
+      <div class="stats-number" id="avg-area">0</div>
+      <div class="stats-label">Средняя площадь</div>
+    </div>
+  `;
+  
+  catalogContent.insertBefore(statsBar, catalogContent.querySelector('#properties-grid'));
+}
+
+function updateStats() {
+  const totalProperties = allProperties.length;
+  const filteredCount = filteredProperties ? filteredProperties.length : 0;
+  
+  const avgPrice = filteredProperties && filteredProperties.length > 0 
+    ? Math.round(filteredProperties.reduce((sum, prop) => sum + prop.price, 0) / filteredProperties.length)
+    : 0;
+    
+  const avgArea = filteredProperties && filteredProperties.length > 0 
+    ? Math.round(filteredProperties.reduce((sum, prop) => sum + prop.area, 0) / filteredProperties.length)
+    : 0;
+  
+  document.getElementById('total-properties').textContent = totalProperties;
+  document.getElementById('filtered-properties').textContent = filteredCount;
+  document.getElementById('avg-price').textContent = `$${avgPrice}к`;
+  document.getElementById('avg-area').textContent = `${avgArea}м²`;
+}
+
+// ==================== ХЛЕБНЫЕ КРОШКИ ====================
+
+function addBreadcrumbs() {
+  const catalogHeader = document.querySelector('.catalog-header');
+  if (!catalogHeader) return;
+  
+  const breadcrumbs = document.createElement('div');
+  breadcrumbs.className = 'breadcrumbs';
+  catalogHeader.appendChild(breadcrumbs);
+}
+
+// ==================== МОБИЛЬНЫЕ ФИЛЬТРЫ ====================
+
+function addMobileFilters() {
+  const catalogContent = document.querySelector('.catalog-content');
+  if (!catalogContent) return;
+  
+  // Создаем кнопку мобильных фильтров
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'mobile-filters-toggle';
+  toggleBtn.innerHTML = '🔍';
+  toggleBtn.onclick = toggleMobileFilters;
+  document.body.appendChild(toggleBtn);
+  
+  // Создаем оверлей
+  const overlay = document.createElement('div');
+  overlay.className = 'mobile-filters-overlay';
+  overlay.onclick = closeMobileFilters;
+  document.body.appendChild(overlay);
+  
+  // Создаем панель фильтров
+  const panel = document.createElement('div');
+  panel.className = 'mobile-filters-panel';
+  panel.innerHTML = `
+    <div class="mobile-filters-header">
+      <h3 class="mobile-filters-title">Фильтры</h3>
+      <button class="mobile-filters-close" onclick="closeMobileFilters()">✕</button>
+    </div>
+    
+    <div class="mobile-filter-group">
+      <label class="mobile-filter-label">Тип сделки</label>
+      <div class="mobile-filter-buttons" id="mobile-transaction-filters">
+        <button class="mobile-filter-btn active" data-value="sale">Продаж</button>
+        <button class="mobile-filter-btn" data-value="rent">Оренда</button>
+        <button class="mobile-filter-btn" data-value="daily">Подобово</button>
+      </div>
+    </div>
+    
+    <div class="mobile-filter-group">
+      <label class="mobile-filter-label">Тип недвижимости</label>
+      <div class="mobile-filter-buttons" id="mobile-type-filters">
+        <button class="mobile-filter-btn" data-value="apartment">Квартира</button>
+        <button class="mobile-filter-btn" data-value="house">Дом</button>
+        <button class="mobile-filter-btn" data-value="office">Офис</button>
+        <button class="mobile-filter-btn" data-value="commercial">Коммерция</button>
+        <button class="mobile-filter-btn" data-value="land">Земля</button>
+        <button class="mobile-filter-btn" data-value="warehouse">Склад</button>
+      </div>
+    </div>
+    
+    <div class="mobile-filter-group">
+      <label class="mobile-filter-label">Количество комнат</label>
+      <div class="mobile-filter-buttons" id="mobile-rooms-filters">
+        <button class="mobile-filter-btn" data-value="1">1</button>
+        <button class="mobile-filter-btn" data-value="2">2</button>
+        <button class="mobile-filter-btn" data-value="3">3</button>
+        <button class="mobile-filter-btn" data-value="4">4</button>
+        <button class="mobile-filter-btn" data-value="5">5+</button>
+      </div>
+    </div>
+    
+    <button class="mobile-apply-filters" onclick="applyMobileFilters()">Применить фильтры</button>
+  `;
+  
+  document.body.appendChild(panel);
+  
+  // Добавляем обработчики
+  setupMobileFilterHandlers();
+}
+
+function setupMobileFilterHandlers() {
+  // Обработчики для кнопок фильтров
+  document.querySelectorAll('.mobile-filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const group = this.parentElement;
+      const isMultiSelect = group.id.includes('type') || group.id.includes('rooms');
+      
+      if (isMultiSelect) {
+        this.classList.toggle('active');
+      } else {
+        group.querySelectorAll('.mobile-filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      }
+    });
+  });
+}
+
+function toggleMobileFilters() {
+  const overlay = document.querySelector('.mobile-filters-overlay');
+  const panel = document.querySelector('.mobile-filters-panel');
+  
+  overlay.style.display = 'block';
+  panel.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileFilters() {
+  const overlay = document.querySelector('.mobile-filters-overlay');
+  const panel = document.querySelector('.mobile-filters-panel');
+  
+  panel.classList.remove('show');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }, 300);
+}
+
+function applyMobileFilters() {
+  // Получаем выбранные фильтры
+  const transactionBtn = document.querySelector('#mobile-transaction-filters .mobile-filter-btn.active');
+  const typeBtns = document.querySelectorAll('#mobile-type-filters .mobile-filter-btn.active');
+  const roomsBtns = document.querySelectorAll('#mobile-rooms-filters .mobile-filter-btn.active');
+  
+  // Обновляем фильтры
+  if (transactionBtn) {
+    filters.transaction = transactionBtn.dataset.value;
+  }
+  
+  if (typeBtns.length > 0) {
+    filters.propertyType = Array.from(typeBtns).map(btn => btn.dataset.value);
+  } else {
+    filters.propertyType = null;
+  }
+  
+  if (roomsBtns.length > 0) {
+    filters.rooms = Array.from(roomsBtns).map(btn => parseInt(btn.dataset.value));
+  } else {
+    filters.rooms = null;
+  }
+  
+  // Применяем фильтры
+  applyFilters();
+  closeMobileFilters();
+  showNotification('Фильтры применены', 'success');
+}
+
+// ==================== КЛАВИАТУРНАЯ НАВИГАЦИЯ ====================
+
+function addKeyboardNavigation() {
+  document.addEventListener('keydown', function(event) {
+    // ESC - закрыть модальное окно или мобильные фильтры
+    if (event.key === 'Escape') {
+      const modal = document.querySelector('.modal.show');
+      if (modal) {
+        closeModal();
+        return;
+      }
+      
+      const mobilePanel = document.querySelector('.mobile-filters-panel.show');
+      if (mobilePanel) {
+        closeMobileFilters();
+        return;
+      }
+    }
+    
+    // Ctrl + F - фокус на поиск
+    if (event.ctrlKey && event.key === 'f') {
+      event.preventDefault();
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
+    
+    // Ctrl + L - показать избранное
+    if (event.ctrlKey && event.key === 'l') {
+      event.preventDefault();
+      showFavorites();
+    }
+    
+    // Ctrl + R - сбросить фильтры
+    if (event.ctrlKey && event.key === 'r') {
+      event.preventDefault();
+      resetFilters();
+    }
+    
+    // Enter - применить фильтры (если фокус на кнопке)
+    if (event.key === 'Enter') {
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement.classList.contains('mobile-apply-filters')) {
+        applyMobileFilters();
+      }
+    }
+    
+    // Стрелки для навигации по карточкам
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      navigateCards(event.key === 'ArrowDown' ? 1 : -1);
+    }
+  });
+}
+
+function navigateCards(direction) {
+  const cards = document.querySelectorAll('.property-card');
+  if (cards.length === 0) return;
+  
+  let currentIndex = -1;
+  cards.forEach((card, index) => {
+    if (card.classList.contains('keyboard-focused')) {
+      currentIndex = index;
+    }
+  });
+  
+  // Убираем предыдущий фокус
+  cards.forEach(card => card.classList.remove('keyboard-focused'));
+  
+  // Вычисляем новый индекс
+  let newIndex = currentIndex + direction;
+  if (newIndex < 0) newIndex = cards.length - 1;
+  if (newIndex >= cards.length) newIndex = 0;
+  
+  // Добавляем фокус к новой карточке
+  cards[newIndex].classList.add('keyboard-focused');
+  cards[newIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  
+  // Добавляем стили для клавиатурного фокуса
+  if (!document.querySelector('#keyboard-focus-styles')) {
+    const style = document.createElement('style');
+    style.id = 'keyboard-focus-styles';
+    style.textContent = `
+      .property-card.keyboard-focused {
+        outline: 3px solid var(--primary-color);
+        outline-offset: 4px;
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+// ==================== СРАВНЕНИЕ ОБЪЕКТОВ ====================
+
+let comparisonList = JSON.parse(localStorage.getItem('propertyComparison') || '[]');
+
+function addComparisonButton(card, propertyId) {
+  const actionDiv = card.querySelector('.property-action');
+  if (!actionDiv) return;
+  
+  const compareBtn = document.createElement('button');
+  compareBtn.className = 'btn-compare';
+  compareBtn.innerHTML = '<span>⚖️</span>';
+  compareBtn.title = 'Сравнить';
+  compareBtn.onclick = () => toggleComparison(propertyId);
+  
+  // Проверяем, есть ли объект в списке сравнения
+  if (comparisonList.includes(propertyId)) {
+    compareBtn.classList.add('active');
+  }
+  
+  actionDiv.appendChild(compareBtn);
+}
+
+function toggleComparison(propertyId) {
+  const isInComparison = comparisonList.includes(propertyId);
+  
+  if (isInComparison) {
+    comparisonList = comparisonList.filter(id => id !== propertyId);
+    showNotification('Удалено из сравнения', 'info');
+  } else {
+    if (comparisonList.length >= 3) {
+      showNotification('Можно сравнить максимум 3 объекта', 'warning');
+      return;
+    }
+    comparisonList.push(propertyId);
+    showNotification('Добавлено в сравнение', 'success');
+  }
+  
+  // Сохраняем в localStorage
+  localStorage.setItem('propertyComparison', JSON.stringify(comparisonList));
+  
+  // Обновляем кнопки сравнения
+  updateComparisonButtons();
+  updateComparisonCounter();
+}
+
+function updateComparisonButtons() {
+  document.querySelectorAll('.btn-compare').forEach(btn => {
+    const card = btn.closest('.property-card');
+    const propertyId = getPropertyIdFromCard(card);
+    
+    if (comparisonList.includes(propertyId)) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+function updateComparisonCounter() {
+  const counter = document.querySelector('.comparison-counter');
+  if (counter) {
+    counter.textContent = comparisonList.length;
+    counter.style.display = comparisonList.length > 0 ? 'flex' : 'none';
+  }
+}
+
+function addComparisonCounter() {
+  const header = document.querySelector('.catalog-header');
+  if (!header) return;
+  
+  const counter = document.createElement('div');
+  counter.className = 'comparison-counter';
+  counter.innerHTML = `
+    <button class="comparison-btn" onclick="showComparison()">
+      <span class="comparison-icon">⚖️</span>
+      <span class="comparison-count">${comparisonList.length}</span>
+    </button>
+  `;
+  
+  header.appendChild(counter);
+  updateComparisonCounter();
+}
+
+function showComparison() {
+  if (comparisonList.length === 0) {
+    showNotification('Список сравнения пуст', 'info');
+    return;
+  }
+  
+  const comparisonProperties = allProperties.filter(prop => comparisonList.includes(prop.id));
+  openComparisonModal(comparisonProperties);
+}
+
+function openComparisonModal(properties) {
+  const modal = document.createElement('div');
+  modal.className = 'modal comparison-modal';
+  modal.innerHTML = `
+    <div class="modal-content comparison-content">
+      <span class="close" onclick="closeComparisonModal()">&times;</span>
+      <div class="comparison-header">
+        <h2>Сравнение объектов</h2>
+        <p>Сравните выбранные объекты недвижимости</p>
+      </div>
+      <div class="comparison-table">
+        <div class="comparison-properties">
+          ${properties.map(prop => `
+            <div class="comparison-property">
+              <div class="comparison-image">
+                <img src="${prop.image}" alt="${prop.title}">
+                <button class="remove-from-comparison" onclick="removeFromComparison(${prop.id})">✕</button>
+              </div>
+              <div class="comparison-title">${prop.title}</div>
+              <div class="comparison-price">$${Math.round(prop.price)}к</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="comparison-details">
+          <div class="comparison-row">
+            <div class="comparison-label">Площадь</div>
+            ${properties.map(prop => `<div class="comparison-value">${Math.round(prop.area)} м²</div>`).join('')}
+          </div>
+          <div class="comparison-row">
+            <div class="comparison-label">Комнат</div>
+            ${properties.map(prop => `<div class="comparison-value">${prop.rooms || '-'}</div>`).join('')}
+          </div>
+          <div class="comparison-row">
+            <div class="comparison-label">Тип</div>
+            ${properties.map(prop => `<div class="comparison-value">${propertyTypes[prop.propertyType] || '-'}</div>`).join('')}
+          </div>
+          <div class="comparison-row">
+            <div class="comparison-label">Расположение</div>
+            ${properties.map(prop => `<div class="comparison-value">${prop.location}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  modal.style.display = 'block';
+  setTimeout(() => modal.classList.add('show'), 100);
+}
+
+function closeComparisonModal() {
+  const modal = document.querySelector('.comparison-modal');
+  if (modal) {
+    modal.classList.remove('show');
+    setTimeout(() => {
+      document.body.removeChild(modal);
+    }, 300);
+  }
+}
+
+function removeFromComparison(propertyId) {
+  comparisonList = comparisonList.filter(id => id !== propertyId);
+  localStorage.setItem('propertyComparison', JSON.stringify(comparisonList));
+  
+  // Обновляем модальное окно
+  const modal = document.querySelector('.comparison-modal');
+  if (modal) {
+    const remainingProperties = allProperties.filter(prop => comparisonList.includes(prop.id));
+    if (remainingProperties.length === 0) {
+      closeComparisonModal();
+      showNotification('Список сравнения очищен', 'info');
+    } else {
+      openComparisonModal(remainingProperties);
+    }
+  }
+  
+  updateComparisonButtons();
+  updateComparisonCounter();
 }
 
 // ==================== ПОИСК И ФИЛЬТРАЦИЯ ====================
@@ -1262,6 +1950,9 @@ function renderSearchResults(results) {
     
     grid.appendChild(card);
     
+    // Добавляем кнопку сравнения
+    addComparisonButton(card, prop.id);
+    
     setTimeout(() => {
       card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
       card.style.opacity = '1';
@@ -1280,10 +1971,20 @@ function renderSearchResults(results) {
 
 // ==================== ДОПОМІЖНІ ФУНКЦІЇ ====================
 
+// ==================== ИЗБРАННОЕ ====================
+
+let favorites = JSON.parse(localStorage.getItem('propertyFavorites') || '[]');
+
 function toggleLike(event) {
   const button = event.target.closest('.btn-like');
   const span = button.querySelector('span');
   const isLiked = span.textContent === '♥';
+  
+  // Получаем ID объекта из карточки
+  const card = button.closest('.property-card');
+  const propertyId = getPropertyIdFromCard(card);
+  
+  if (!propertyId) return;
   
   // Анимация изменения
   button.style.transform = 'scale(1.2)';
@@ -1291,15 +1992,120 @@ function toggleLike(event) {
     button.style.transform = 'scale(1)';
   }, 150);
   
-  // Изменение иконки
-  span.textContent = isLiked ? '♡' : '♥';
-  
-  // Добавляем класс для стилизации
   if (isLiked) {
+    // Удаляем из избранного
+    favorites = favorites.filter(id => id !== propertyId);
+    span.textContent = '♡';
     button.classList.remove('liked');
+    showNotification('Удалено из избранного', 'info');
   } else {
+    // Добавляем в избранное
+    favorites.push(propertyId);
+    span.textContent = '♥';
     button.classList.add('liked');
+    showNotification('Добавлено в избранное', 'success');
   }
+  
+  // Сохраняем в localStorage
+  localStorage.setItem('propertyFavorites', JSON.stringify(favorites));
+  updateFavoritesCounter();
+}
+
+function getPropertyIdFromCard(card) {
+  // Ищем кнопку "Детально" и извлекаем ID из onclick
+  const detailsBtn = card.querySelector('.btn-details');
+  if (detailsBtn && detailsBtn.onclick) {
+    const onclickStr = detailsBtn.onclick.toString();
+    const match = onclickStr.match(/openModal\((\d+)\)/);
+    return match ? parseInt(match[1]) : null;
+  }
+  return null;
+}
+
+function updateFavoritesCounter() {
+  const counter = document.querySelector('.favorites-counter');
+  if (counter) {
+    counter.textContent = favorites.length;
+  }
+}
+
+function addFavoritesCounter() {
+  const header = document.querySelector('.catalog-header');
+  if (!header) return;
+  
+  const counter = document.createElement('div');
+  counter.className = 'favorites-counter';
+  counter.innerHTML = `
+    <button class="favorites-btn" onclick="showFavorites()">
+      <span class="favorites-icon">❤️</span>
+      <span class="favorites-count">${favorites.length}</span>
+    </button>
+  `;
+  
+  header.appendChild(counter);
+}
+
+function showFavorites() {
+  if (favorites.length === 0) {
+    showNotification('Список избранного пуст', 'info');
+    return;
+  }
+  
+  const favoriteProperties = allProperties.filter(prop => favorites.includes(prop.id));
+  filteredProperties = favoriteProperties;
+  displayedCount = 12;
+  renderProperties();
+  
+  showNotification(`Показано ${favoriteProperties.length} избранных объектов`, 'success');
+}
+
+function updateLikeButtons() {
+  document.querySelectorAll('.btn-like').forEach(button => {
+    const card = button.closest('.property-card');
+    const propertyId = getPropertyIdFromCard(card);
+    
+    if (propertyId && favorites.includes(propertyId)) {
+      const span = button.querySelector('span');
+      span.textContent = '♥';
+      button.classList.add('liked');
+    }
+  });
+}
+
+function toggleLike(event) {
+  const button = event.target.closest('.btn-like');
+  const span = button.querySelector('span');
+  const isLiked = span.textContent === '♥';
+  
+  // Получаем ID объекта из карточки
+  const card = button.closest('.property-card');
+  const propertyId = getPropertyIdFromCard(card);
+  
+  if (!propertyId) return;
+  
+  // Анимация изменения
+  button.style.transform = 'scale(1.2)';
+  setTimeout(() => {
+    button.style.transform = 'scale(1)';
+  }, 150);
+  
+  if (isLiked) {
+    // Удаляем из избранного
+    favorites = favorites.filter(id => id !== propertyId);
+    span.textContent = '♡';
+    button.classList.remove('liked');
+    showNotification('Удалено из избранного', 'info');
+  } else {
+    // Добавляем в избранное
+    favorites.push(propertyId);
+    span.textContent = '♥';
+    button.classList.add('liked');
+    showNotification('Добавлено в избранное', 'success');
+  }
+  
+  // Сохраняем в localStorage
+  localStorage.setItem('propertyFavorites', JSON.stringify(favorites));
+  updateFavoritesCounter();
 }
 
 function resetFilters() {
@@ -1364,6 +2170,22 @@ document.addEventListener("DOMContentLoaded", function() {
   
   // Добавляем функциональность поиска
   addSearchFunctionality();
+  
+  // Добавляем дополнительные UX компоненты
+  addBreadcrumbs();
+  addSortControls();
+  addStatsBar();
+  addMobileFilters();
+  addFavoritesCounter();
+  addComparisonCounter();
+  updateBreadcrumbs();
+  updateStats();
+  updateFavoritesCounter();
+  updateComparisonCounter();
+  updateComparisonButtons();
+  
+  // Добавляем клавиатурную навигацию
+  addKeyboardNavigation();
 });
 
 // ==================== БЫСТРЫЕ ФИЛЬТРЫ ВВЕРХУ ====================
