@@ -35,100 +35,182 @@
     <!-- Каталог -->
     <section class="catalog">
         <div class="container catalog-full">
+            <!-- Заголовок каталогу -->
             <div class="catalog-header">
                 <h2>Каталог Нерухомості</h2>
                 <p>Знайдіть ідеальну нерухомість для вас</p>
             </div>
 
-            <!-- ГОРИЗОНТАЛЬНОЕ МЕНЮ С БЫСТРЫМИ ФИЛЬТРАМИ -->
+            <!-- Поиск и быстрые фильтры -->
+            <div class="search-section">
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" id="search-input" class="search-input" placeholder="Пошук за адресою або назвою...">
+                        <button class="search-clear" id="search-clear" style="display: none;">✕</button>
+                    </div>
+                    <button class="btn btn-primary search-btn" onclick="performSearch()">Знайти</button>
+                </div>
+            </div>
+
+            <!-- Типы недвижимости (горизонтальное меню) -->
             <div class="quick-filters-bar">
                 <div class="quick-filters-container">
-                    <!-- Типи нерухомості -->
                     <div class="quick-filter-group">
-                        <button class="quick-filter-btn active" data-type="apartment">Квартира</button>
-                        <button class="quick-filter-btn" data-type="house">Будинок</button>
-                        <button class="quick-filter-btn" data-type="commercial">Комерція</button>
-                        <button class="quick-filter-btn" data-type="office">Офіс</button>
-                        <button class="quick-filter-btn" data-type="land">Земля</button>
-                        <button class="quick-filter-btn" data-type="warehouse">Нежитлове</button>
+                        <button class="quick-filter-btn active" data-type="all">Усе</button>
+                        <button class="quick-filter-btn" data-type="apartment">🏢 Квартира</button>
+                        <button class="quick-filter-btn" data-type="house">🏠 Будинок</button>
+                        <button class="quick-filter-btn" data-type="commercial">🏪 Комерція</button>
+                        <button class="quick-filter-btn" data-type="office">💼 Офіс</button>
+                        <button class="quick-filter-btn" data-type="land">🌳 Земля</button>
+                        <button class="quick-filter-btn" data-type="warehouse">🏭 Нежитлове</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Главный контейнер с фильтрами и каталогом -->
             <div class="catalog-layout">
-                <!-- Левая колонка - Кнопочные фильтры -->
+                <!-- Боковая панель фильтров -->
                 <aside class="filters-sidebar">
-                    <h3>Фільтри</h3>
+                    <div class="filters-header">
+                        <h3>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                            </svg>
+                            Фільтри
+                        </h3>
+                        <button class="btn-reset" onclick="resetFilters()">Скинути</button>
+                    </div>
                     
-                    <!-- Города (в обраній області) -->
+                    <!-- Місто -->
                     <div class="filter-section">
                         <h4>📍 Місто</h4>
                         <div class="filter-buttons" id="city-buttons"></div>
                     </div>
 
-                    <!-- Кнопка сброса -->
-                    <button class="btn btn-secondary" onclick="resetFilters()" style="width: 100%; margin-top: 20px;">Скинути все</button>
-                </aside>
-
-                <!-- Центральная колонка - Таблица и объекты -->
-                <div class="catalog-content">
-                    <!-- Таблица фильтров (районы, комнаты, площа) -->
-                    <div class="filters-table" id="filters-table-container" style="display: none;"></div>
-
-                    <!-- Область та Районы міста -->
-                    <div class="district-header" id="district-header" style="display: none;">
-                        <div class="district-info">
-                            <div class="district-region">
-                                <span class="region-label" id="region-label">🏘️ Район:</span>
-                                <span class="region-name" id="region-name"></span>
-                            </div>
-                            <div class="district-type-toggle">
-                                <button class="district-type-btn active" onclick="selectDistrictType('city')">Місто</button>
-                                <button class="district-type-btn" onclick="selectDistrictType('region')">Область</button>
-                            </div>
+                    <!-- Ціна -->
+                    <div class="filter-section">
+                        <h4>💰 Ціна</h4>
+                        <div class="price-range">
+                            <input type="number" id="price-min" placeholder="Від" class="price-input">
+                            <span class="range-separator">—</span>
+                            <input type="number" id="price-max" placeholder="До" class="price-input">
                         </div>
-                        <div class="district-controls">
-                            <button class="district-btn" onclick="selectAllDistricts()">Усі</button>
-                            <button class="district-btn" onclick="clearDistricts()">Очистити</button>
+                        <div class="price-currency">
+                            <button class="currency-btn active" data-currency="usd">$</button>
+                            <button class="currency-btn" data-currency="uah">₴</button>
                         </div>
+                    </div>
+
+                    <!-- Кімнати (для квартир) -->
+                    <div class="filter-section" id="rooms-filter" style="display: none;">
+                        <h4>🛏️ Кімнати</h4>
+                        <div class="rooms-selector">
+                            <button class="room-btn" data-rooms="1">1</button>
+                            <button class="room-btn" data-rooms="2">2</button>
+                            <button class="room-btn" data-rooms="3">3</button>
+                            <button class="room-btn" data-rooms="4">4+</button>
+                        </div>
+                    </div>
+
+                    <!-- Площа -->
+                    <div class="filter-section">
+                        <h4>📐 Площа (м²)</h4>
+                        <div class="price-range">
+                            <input type="number" id="area-min" placeholder="Від" class="price-input">
+                            <span class="range-separator">—</span>
+                            <input type="number" id="area-max" placeholder="До" class="price-input">
+                        </div>
+                    </div>
+
+                    <!-- Додаткові фільтри -->
+                    <div class="filter-section">
+                        <button class="filter-toggle" onclick="toggleAdvancedFilters()">
+                            <span>Додаткові фільтри</span>
+                            <svg class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="advanced-filters" id="advanced-filters" style="display: none;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filter-parking">
+                                <span>Паркінг</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filter-balcony">
+                                <span>Балкон</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filter-furniture">
+                                <span>З меблями</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filter-pets">
+                                <span>Дозволені тварини</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Районы -->
+                    <div class="filter-section" id="district-filter" style="display: none;">
+                        <h4>🏘️ Район</h4>
                         <div class="district-chips" id="district-chips"></div>
                     </div>
+                </aside>
 
-                    <!-- Мікрорайони -->
-                    <div class="microdistrict-header" id="microdistrict-header" style="display: none;">
-                        <div class="microdistrict-region">
-                            <span class="region-label" id="microdistrict-label">👥 Мікрорайон:</span>
+                <!-- Контент каталога -->
+                <div class="catalog-content">
+                    <!-- Панель управления результатами -->
+                    <div class="results-toolbar">
+                        <div class="results-info">
+                            <span id="results-count">0 об'єктів</span>
                         </div>
-                        <div class="district-controls">
-                            <button class="district-btn" onclick="selectAllMicrodistricts()">Усі</button>
-                            <button class="district-btn" onclick="clearMicrodistricts()">Очистити</button>
+                        <div class="results-controls">
+                            <div class="sort-dropdown">
+                                <label for="sort-select">Сортувати:</label>
+                                <select id="sort-select" class="sort-select">
+                                    <option value="newest">Найновіші</option>
+                                    <option value="price-asc">Ціна: зростання</option>
+                                    <option value="price-desc">Ціна: спадання</option>
+                                    <option value="area-asc">Площа: зростання</option>
+                                    <option value="area-desc">Площа: спадання</option>
+                                </select>
+                            </div>
+                            <div class="view-toggle">
+                                <button class="view-btn active" data-view="grid" title="Сітка">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="14" width="7" height="7"></rect>
+                                        <rect x="3" y="14" width="7" height="7"></rect>
+                                    </svg>
+                                </button>
+                                <button class="view-btn" data-view="list" title="Список">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                        <div class="microdistrict-chips" id="microdistrict-chips"></div>
                     </div>
 
-                    <!-- Метро (якщо є) -->
-                    <div class="metro-header" id="metro-header" style="display: none;">
-                        <div class="metro-info">
-                            <div class="metro-region">
-                                <span class="region-label">🚇 Метро:</span>
-                                <span class="region-name" id="metro-city-name"></span>
-                            </div>
-                            <div class="metro-lines-toggle" id="metro-lines-toggle">
-                                <!-- Кнопки ліній метро будуть тут -->
-                            </div>
-                        </div>
-                        <div class="district-controls">
-                            <button class="district-btn" onclick="selectAllMetroStations()">Усі</button>
-                            <button class="district-btn" onclick="clearMetro()">Очистити</button>
-                        </div>
-                        <div class="metro-chips" id="metro-chips"></div>
+                    <!-- Сетка объектов -->
+                    <div class="properties-grid" id="properties-grid">
+                        <!-- Карточки будут здесь -->
                     </div>
 
-                    <!-- Telegram Кнопка -->
-                    <div id="telegram-button" style="display: none; text-align: center; margin-bottom: 30px;"></div>
-
-                    <!-- Каталог об'єктів -->
-                    <div class="properties-grid" id="properties-grid"></div>
+                    <!-- Пагинация -->
+                    <div class="pagination" id="pagination" style="display: none;">
+                        <!-- Будет генерироваться JS -->
+                    </div>
 
                     <!-- Кнопка "Показати ще" -->
                     <div id="load-more-container" style="text-align: center; margin-top: 40px;">
@@ -173,6 +255,7 @@
         </div>
     </footer>
 
-    <script src="js/script.js?v=3"></script>
+    <script src="js/script.js?v=4"></script>
+    <script src="js/catalog.js?v=1"></script>
 </body>
 </html>

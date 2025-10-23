@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Деталі нерухомості - EstatyQ</title>
+    <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Дополнительные стили для детальной страницы */
+        .property-detail-hero {
+            position: relative;
+            height: 500px;
+            background: #000;
+            margin-bottom: 40px;
+        }
+
+        .detail-gallery {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .detail-gallery img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-thumbs {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .thumb {
+            width: 80px;
+            height: 60px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .thumb:hover {
+            border-color: var(--gold-color);
+        }
+
+        .thumb.active {
+            border-color: var(--gold-color);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detail-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .detail-main {
+            background: rgba(26, 26, 26, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .detail-sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .price-card {
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(10, 10, 10, 0.9));
+            border: 2px solid var(--gold-color);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.2);
+        }
+
+        .price-card .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-color);
+            margin-bottom: 10px;
+        }
+
+        .price-card .price-unit {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .contact-card {
+            background: rgba(26, 26, 26, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .contact-card h3 {
+            color: var(--gold-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .contact-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: var(--gold-color);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .contact-btn:hover {
+            background: var(--gold-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .contact-btn.secondary {
+            background: transparent;
+            border: 2px solid var(--gold-color);
+            color: var(--gold-color);
+        }
+
+        .contact-btn.secondary:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .detail-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .detail-section:last-child {
+            border-bottom: none;
+        }
+
+        .detail-section h3 {
+            color: var(--gold-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .spec-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .spec-label {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .spec-value {
+            color: var(--text-dark);
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--gold-color);
+        }
+
+        .map-container {
+            width: 100%;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 1024px) {
+            .detail-content {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .property-detail-hero {
+                height: 300px;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Навігація -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="обрезаный_логотип-removebg-preview.png" alt="ESTATYQ" class="logo-icon-image"/>
+                <div class="logo-text">
+                    <h1>ESTATYQ</h1>
+                    <p class="logo-tagline">МРІЯ СТАЄ РЕАЛЬНІСТЮ</p>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Каталог</a></li>
+                <li><a href="pages/landing.html">Про нас</a></li>
+                <li><a href="pages/content.html">Контент</a></li>
+                <li><a href="pages/contact.html">Контакти</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Герой с галереей -->
+    <section class="property-detail-hero">
+        <div class="detail-gallery">
+            <img id="main-image" src="https://via.placeholder.com/1200x500?text=Квартира" alt="Property">
+            <div class="gallery-thumbs" id="gallery-thumbs">
+                <!-- Миниатюры будут добавлены через JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Контент -->
+    <section style="padding: 0 20px 80px;">
+        <div class="container">
+            <div class="detail-content">
+                <!-- Основная информация -->
+                <div class="detail-main">
+                    <h1 id="property-title">Сучасна квартира в центрі міста</h1>
+                    <p style="color: var(--text-light); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <span id="property-location">Печерськ, Київ</span>
+                    </p>
+
+                    <!-- Основные характеристики -->
+                    <div class="detail-section">
+                        <h3>Основні характеристики</h3>
+                        <div class="specs-grid" id="main-specs">
+                            <!-- Будут добавлены через JS -->
+                        </div>
+                    </div>
+
+                    <!-- Описание -->
+                    <div class="detail-section">
+                        <h3>Опис</h3>
+                        <p id="property-description" style="color: var(--text-light); line-height: 1.8;">
+                            Пропонуємо до вашої уваги сучасну квартиру в одному з найпрестижніших районів міста. Квартира розташована в новобудові з розвиненою інфраструктурою, поруч метро, парки, школи та торгові центри. Ідеальний варіант для комфортного проживання.
+                        </p>
+                    </div>
+
+                    <!-- Удобства -->
+                    <div class="detail-section">
+                        <h3>Зручності</h3>
+                        <div class="features-list" id="features-list">
+                            <!-- Будут добавлены через JS -->
+                        </div>
+                    </div>
+
+                    <!-- Карта -->
+                    <div class="detail-section">
+                        <h3>Розташування</h3>
+                        <div class="map-container">
+                            <p>Карта буде додана тут (Google Maps API)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Боковая панель -->
+                <div class="detail-sidebar">
+                    <!-- Цена -->
+                    <div class="price-card">
+                        <div class="price" id="property-price">$85,000</div>
+                        <div class="price-unit">або $1,200/м²</div>
+                    </div>
+
+                    <!-- Контакты -->
+                    <div class="contact-card">
+                        <h3>Зв'язатися з нами</h3>
+                        <button class="contact-btn" onclick="window.open('https://t.me/estatyq_kyiv', '_blank')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                            </svg>
+                            Telegram
+                        </button>
+                        <button class="contact-btn secondary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            Подзвонити
+                        </button>
+                        <button class="contact-btn secondary" onclick="toggleFavoriteDetail()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                            У вибране
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h4>EstatyQ</h4>
+                <p>Ваш надійний партнер у світі нерухомості</p>
+            </div>
+            <div class="footer-section">
+                <h4>Швидке Меню</h4>
+                <ul>
+                    <li><a href="index.html">Каталог</a></li>
+                    <li><a href="pages/landing.html">Про нас</a></li>
+                    <li><a href="pages/content.html">Контент</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Контакти</h4>
+                <p>+380 (44) 123-45-67</p>
+                <p>info@estatyq.ua</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 EstatyQ. Всі права захищені. | Розроблено з 💛</p>
+        </div>
+    </footer>
+
+    <script>
+        // Пример данных (в реальном проекте будет из URL параметров или API)
+        const propertyData = {
+            id: 1,
+            title: "Сучасна 2-кімнатна квартира в центрі",
+            location: "Печерськ, Київ",
+            price: 85000,
+            pricePerSqm: 1200,
+            currency: "$",
+            rooms: 2,
+            area: 65,
+            floor: 5,
+            totalFloors: 12,
+            building: 2020,
+            images: [
+                "https://via.placeholder.com/1200x500?text=Вітальня",
+                "https://via.placeholder.com/1200x500?text=Кухня",
+                "https://via.placeholder.com/1200x500?text=Спальня",
+                "https://via.placeholder.com/1200x500?text=Ванна",
+                "https://via.placeholder.com/1200x500?text=Вид+з+вікна"
+            ],
+            features: [
+                { icon: "✓", text: "Паркінг" },
+                { icon: "✓", text: "Ліфт" },
+                { icon: "✓", text: "Охорона 24/7" },
+                { icon: "✓", text: "З меблями" },
+                { icon: "✓", text: "Балкон" },
+                { icon: "✓", text: "Нова сантехніка" }
+            ],
+            description: "Пропонуємо до вашої уваги сучасну 2-кімнатну квартиру в серці Печерського району. Квартира знаходиться в новобудові класу бізнес з розвиненою інфраструктурою. Поруч метро (5 хв пішки), парки, школи, дитячі садки та торгові центри. Ідеальний варіант для комфортного проживання або інвестицій."
+        };
+
+        // Инициализация
+        document.getElementById('property-title').textContent = propertyData.title;
+        document.getElementById('property-location').textContent = propertyData.location;
+        document.getElementById('property-price').textContent = `${propertyData.currency}${propertyData.price.toLocaleString()}`;
+        document.getElementById('property-description').textContent = propertyData.description;
+
+        // Основные характеристики
+        const specsContainer = document.getElementById('main-specs');
+        const specs = [
+            { label: "Кімнат", value: propertyData.rooms },
+            { label: "Площа", value: `${propertyData.area} м²` },
+            { label: "Поверх", value: `${propertyData.floor} з ${propertyData.totalFloors}` },
+            { label: "Рік побудови", value: propertyData.building }
+        ];
+
+        specs.forEach(spec => {
+            specsContainer.innerHTML += `
+                <div class="spec-item">
+                    <div class="spec-label">${spec.label}</div>
+                    <div class="spec-value">${spec.value}</div>
+                </div>
+            `;
+        });
+
+        // Удобства
+        const featuresContainer = document.getElementById('features-list');
+        propertyData.features.forEach(feature => {
+            featuresContainer.innerHTML += `
+                <div class="feature-item">
+                    <span class="feature-icon">${feature.icon}</span>
+                    <span style="color: var(--text-light);">${feature.text}</span>
+                </div>
+            `;
+        });
+
+        // Галерея
+        const mainImage = document.getElementById('main-image');
+        const thumbsContainer = document.getElementById('gallery-thumbs');
+        
+        propertyData.images.forEach((img, index) => {
+            const thumb = document.createElement('div');
+            thumb.className = `thumb ${index === 0 ? 'active' : ''}`;
+            thumb.innerHTML = `<img src="${img}" alt="Photo ${index + 1}">`;
+            thumb.onclick = () => {
+                mainImage.src = img;
+                document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
+            };
+            thumbsContainer.appendChild(thumb);
+        });
+
+        function toggleFavoriteDetail() {
+            alert('Додано до вибраного!');
+        }
+    </script>
+</body>
+</html>
