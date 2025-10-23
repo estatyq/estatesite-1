@@ -520,4 +520,108 @@ animation-delay: var(delay);
 **Дата оновлення**: 23 жовтня 2025  
 **Статус**: ✅ Завершено
 
+## 💻 Примеры реализации
+
+### Пример 1: Основные эффекты карточки
+
+```css
+/* Основное поднимание и масштабирование */
+.property-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 24px 48px rgba(212, 175, 55, 0.25);
+}
+
+/* Быстрая кривая анимации для плавности */
+.property-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+```
+
+### Пример 2: Анимация масштабирования изображения
+
+```css
+/* Плавное увеличение при наведении */
+.property-card:hover .property-image img {
+    transform: scale(1.08);
+    /* 500ms для плавности */
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+```
+
+### Пример 3: Каскадная анимация тегов
+
+```css
+/* Каждый тег появляется с задержкой */
+.feature-tag {
+    animation: taginit 0.3s ease-out backwards;
+}
+
+.feature-tag:nth-child(1) { animation-delay: 0s; }
+.feature-tag:nth-child(2) { animation-delay: 0.1s; }
+.feature-tag:nth-child(3) { animation-delay: 0.2s; }
+.feature-tag:nth-child(4) { animation-delay: 0.3s; }
+
+@keyframes taginit {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+```
+
+### Пример 4: Хвильовой эффект на кнопке
+
+```css
+.btn-details::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, 
+                                rgba(212, 175, 55, 0.2), 
+                                transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-details:hover::before {
+    left: 100%;
+}
+```
+
+### Пример 5: Эффект серцебиения для кнопки "Вподобається"
+
+```css
+.btn-like.liked {
+    background: var(--gold-color);
+    color: #0a0a0a;
+    animation: heartBeat 0.6s ease-in-out;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+```
+
+### Пример 6: Морозный стеклянный эффект
+
+```css
+.property-card {
+    backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, 
+                rgba(26, 26, 26, 0.8), 
+                rgba(26, 26, 26, 0.6));
+}
+```
+
+---
+
 
