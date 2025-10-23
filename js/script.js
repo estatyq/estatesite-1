@@ -512,6 +512,7 @@ let filters = {
   districts: [],
   microdistricts: [],
   metro: null, // Станція метро
+  metroStations: [],
   transaction: null,
   type: null,
   location: null,
@@ -1039,12 +1040,33 @@ function applyFilters() {
     if (filters.landType && prop.landType !== filters.landType) return false;
     if (filters.warehouseType && prop.warehouseType !== filters.warehouseType) return false;
     
+    // Пошук по тексту
+    if (filters.search) {
+      const hay = `${prop.title} ${cities[prop.city]?.name || ''} ${prop.location} ${propertyTypes[prop.type]}`.toLowerCase();
+      if (!hay.includes(filters.search)) return false;
+    }
     return true;
   });
 
-  displayedCount = 12;
-  renderProperties(filtered);
+  // Сортування
+  if (filters.sort && filters.sort !== 'default') {
+    const s = filters.sort;
+    filtered.sort((a, b) => {
+      switch (s) {
+        case 'price_asc': return (a.price || 0) - (b.price || 0);
+        case 'price_desc': return (b.price || 0) - (a.price || 0);
+        case 'area_asc': return (a.area || 0) - (b.area || 0);
+        case 'area_desc': return (b.area || 0) - (a.area || 0);
+        case 'newest': return (b.id || 0) - (a.id || 0);
+        default: return 0;
+      }
+    });
+  }
+
   filteredProperties = filtered;
+  displayedCount = 12;
+  renderProperties();
+  updateAppliedChips();
 }
 
 // ==================== РЕНДЕРИНГ СВОЙСТВ ====================
@@ -1096,6 +1118,9 @@ function renderProperties() {
   } else {
     btn.style.display = "block";
   }
+
+  // Обновить счетчик результатов
+  updateResultsCount();
 }
 
 function loadMoreProperties() {
@@ -1178,6 +1203,7 @@ function resetFilters() {
     city: null,
     districts: [],
     microdistricts: [],
+    metroStations: [],
     transaction: null,
     type: null,
     location: null,
@@ -1213,6 +1239,8 @@ function resetFilters() {
   renderMicrodistricts();
   updateTableFilters();
   applyFilters();
+  updateAppliedChips();
+  updateUrl();
 }
 
 // ==================== ІНЦІАЛІЗАЦІЯ ====================
@@ -1231,6 +1259,11 @@ document.addEventListener("DOMContentLoaded", function() {
   
   // Добавляем слушатели для быстрых фильтров вверху
   setupQuickFilters();
+
+  // Controls: search, sort, view
+  setupControls();
+  restoreFromUrl();
+  updateAppliedChips();
 });
 
 // ==================== БЫСТРЫЕ ФИЛЬТРЫ ВВЕРХУ ====================
@@ -1272,6 +1305,101 @@ function setupQuickFilters() {
       btn.classList.add('active');
     });
   });
+}
+
+// ==================== ПАНЕЛЬ КЕРУВАННЯ (ПОШУК, СОРТ, ВИД) ====================
+
+function setupControls() {
+  const searchInput = document.getElementById('search-input');
+  const sortSelect = document.getElementById('sort-select');
+  const viewGridBtn = document.getElementById('view-grid-btn');
+  const viewListBtn = document.getElementById('view-list-btn');
+  const grid = document.getElementById('properties-grid');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', debounce(() => {
+      const q = searchInput.value.trim().toLowerCase();
+      filters.search = q || null;
+      displayedCount = 12;
+      applyFilters();
+      updateAppliedChips();
+      updateUrl();
+    }, 200));
+  }
+
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      filters.sort = sortSelect.value;
+      displayedCount = 12;
+      applyFilters();
+      updateUrl();
+    });
+  }
+
+  if (viewGridBtn && viewListBtn) {
+    const setView = (mode) => {
+      const isList = mode === 'list';
+      grid.classList.toggle('list-view', isList);
+      viewGridBtn.classList.toggle('active', !isList);
+      viewListBtn.classList.toggle('active', isList);
+      viewGridBtn.setAttribute('aria-pressed', String(!isList));
+      viewListBtn.setAttribute('aria-pressed', String(isList));
+      localStorage.setItem('catalogView', mode);
+    };
+
+    viewGridBtn.addEventListener('click', () => setView('grid'));
+    viewListBtn.addEventListener('click', () => setView('list'));
+
+    // init from storage
+    const initial = localStorage.getItem('catalogView') || 'grid';
+    setView(initial);
+  }
+}
+
+function updateResultsCount() {
+  const el = document.getElementById('results-count');
+  if (!el) return;
+  el.textContent = `Показано ${Math.min(displayedCount, filteredProperties.length)} з ${filteredProperties.length}`;
+}
+
+function updateAppliedChips() {
+  const wrap = document.getElementById('applied-chips');
+  if (!wrap) return;
+
+  const chips = [];
+
+  if (filters.transaction) chips.push(chip('Угода', filters.transaction === 'sale' ? 'Продаж' : (filters.transaction === 'rent' ? 'Оренда' : 'Подобово'), () => { filters.transaction = null; applyFilters(); syncNavTransactionButtons(null); }));
+  if (filters.type) chips.push(chip('Тип', propertyTypes[filters.type], () => { filters.type = null; updateTableFilters(); applyFilters(); clearActiveQuickType(); }));
+  if (filters.city) chips.push(chip('Місто', cities[filters.city]?.name || filters.city, () => { filters.city = null; filters.districts = []; filters.microdistricts = []; renderCityButtons(); renderDistrictChips(); renderMicrodistricts(); updateTableFilters(); applyFilters(); }));
+  if (filters.districts?.length) chips.push(chip('Райони', filters.districts.join(', '), () => { filters.districts = []; renderDistrictChips(); renderMicrodistricts(); updateTableFilters(); applyFilters(); }));
+  if (filters.microdistricts?.length) chips.push(chip('Мікрорайони', filters.microdistricts.join(', '), () => { filters.microdistricts = []; renderMicrodistricts(); updateTableFilters(); applyFilters(); }));
+  if (filters.search) chips.push(chip('Пошук', filters.search, () => { filters.search = null; const i = document.getElementById('search-input'); if (i) i.value=''; applyFilters(); }));
+
+  // numeric ranges
+  const rangeLabel = (min, max, unit='') => {
+    const parts = [];
+    if (min != null) parts.push(`від ${min}${unit}`);
+    if (max != null) parts.push(`до ${max}${unit}`);
+    return parts.join(' ');
+  };
+
+  if (filters.priceMin != null || filters.priceMax != null) chips.push(chip('Ціна', rangeLabel(filters.priceMin, filters.priceMax, 'k'), () => { filters.priceMin = null; filters.priceMax = null; updateTableFilters(); applyFilters(); }));
+  if (filters.areaMin != null || filters.areaMax != null) chips.push(chip('Площа', rangeLabel(filters.areaMin, filters.areaMax, 'м²'), () => { filters.areaMin = null; filters.areaMax = null; updateTableFilters(); applyFilters(); }));
+
+  wrap.innerHTML = '';
+  chips.forEach(c => wrap.appendChild(c));
+}
+
+function chip(label, value, onRemove) {
+  const el = document.createElement('div');
+  el.className = 'applied-chip';
+  el.innerHTML = `<strong>${label}:</strong> ${escapeHtml(value)} <span class="chip-close" aria-label="Скинути">✕</span>`;
+  el.querySelector('.chip-close').onclick = () => { onRemove?.(); updateAppliedChips(); updateUrl(); };
+  return el;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 }
 
 // Допоміжна функція для отримання інформації про міст/область

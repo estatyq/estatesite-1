@@ -72,6 +72,35 @@
 
                 <!-- Центральная колонка - Таблица и объекты -->
                 <div class="catalog-content">
+                    <!-- Панель керування каталогом -->
+                    <div class="catalog-controls" role="region" aria-label="Панель керування каталогом">
+                        <div class="controls-left">
+                            <div class="search-control">
+                                <input id="search-input" class="search-input" type="search" placeholder="Пошук: адреса, район, місто, тип..." aria-label="Пошук по каталогу" />
+                            </div>
+                        </div>
+                        <div class="controls-right">
+                            <div class="results-count" aria-live="polite" id="results-count">Показано 0 з 0</div>
+                            <div class="sort-control">
+                                <select id="sort-select" aria-label="Сортування">
+                                    <option value="default">Сортування: за замовчуванням</option>
+                                    <option value="price_asc">Ціна ↑</option>
+                                    <option value="price_desc">Ціна ↓</option>
+                                    <option value="area_asc">Площа ↑</option>
+                                    <option value="area_desc">Площа ↓</option>
+                                    <option value="newest">Нові спочатку</option>
+                                </select>
+                            </div>
+                            <div class="view-toggle" role="group" aria-label="Перемикання виду">
+                                <button class="view-btn active" id="view-grid-btn" data-view="grid" title="Сітка" aria-pressed="true">▦</button>
+                                <button class="view-btn" id="view-list-btn" data-view="list" title="Список" aria-pressed="false">☰</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Обрані фільтри (чіпси) -->
+                    <div class="applied-filters" id="applied-chips" aria-live="polite"></div>
+
                     <!-- Таблица фильтров (районы, комнаты, площа) -->
                     <div class="filters-table" id="filters-table-container" style="display: none;"></div>
 

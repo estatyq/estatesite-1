@@ -339,6 +339,140 @@ h1, h2, h3, h4, h5, h6 {
     background: #0a0a0a;
 }
 
+.catalog-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 15px 20px;
+    background: rgba(26, 26, 26, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.catalog-controls .controls-left,
+.catalog-controls .controls-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.catalog-controls .search-control {
+    min-width: 260px;
+}
+
+.catalog-controls .search-control .search-input {
+    min-width: 280px;
+}
+
+.results-count {
+    color: var(--text-light);
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.sort-control select {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--text-dark);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.view-toggle {
+    display: flex;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.view-btn {
+    background: transparent;
+    color: var(--primary-color);
+    padding: 8px 12px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-btn:hover {
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.view-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: #0a0a0a;
+}
+
+.applied-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0 30px;
+}
+
+.applied-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--primary-color);
+    border-radius: 18px;
+    font-size: 12px;
+}
+
+.applied-chip .chip-close {
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.applied-chip .chip-close:hover {
+    opacity: 1;
+}
+
+/* View: list */
+.properties-grid.list-view {
+    display: block;
+}
+
+.properties-grid.list-view .property-card {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 0;
+    min-height: 220px;
+}
+
+.properties-grid.list-view .property-image {
+    height: 100%;
+}
+
+@media (max-width: 1024px) {
+    .catalog-controls {
+        flex-wrap: wrap;
+    }
+
+    .catalog-controls .controls-left {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .catalog-controls .search-control .search-input {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .properties-grid.list-view .property-card {
+        grid-template-columns: 1fr;
+    }
+}
+
 .catalog-header {
     text-align: center;
     margin-bottom: 50px;
