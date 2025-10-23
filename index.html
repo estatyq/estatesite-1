@@ -32,12 +32,78 @@
         </div>
     </nav>
 
+    <!-- Поисковая секция -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-header">
+                <h1 class="search-title">Знайдіть ідеальну нерухомість</h1>
+                <p class="search-subtitle">Більше 10,000 об'єктів по всій Україні</p>
+            </div>
+            
+            <!-- Улучшенная поисковая строка -->
+            <div class="search-container">
+                <div class="search-input-group">
+                    <div class="search-icon">🔍</div>
+                    <input type="text" id="search-input" class="search-input" placeholder="Введіть назву міста, району або вулиці...">
+                    <div class="search-suggestions" id="search-suggestions"></div>
+                </div>
+                <button class="search-btn" onclick="performSearch()">
+                    <span>Пошук</span>
+                    <div class="search-btn-icon">→</div>
+                </button>
+            </div>
+
+            <!-- Статистика -->
+            <div class="search-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="total-properties">2,847</span>
+                    <span class="stat-label">Об'єктів</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="active-cities">7</span>
+                    <span class="stat-label">Міст</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="avg-price">$45K</span>
+                    <span class="stat-label">Середня ціна</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Каталог -->
     <section class="catalog">
         <div class="container catalog-full">
             <div class="catalog-header">
                 <h2>Каталог Нерухомості</h2>
-                <p>Знайдіть ідеальну нерухомість для вас</p>
+                <div class="catalog-controls">
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid" title="Сітка">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="3" y="3" width="7" height="7"/>
+                                <rect x="14" y="3" width="7" height="7"/>
+                                <rect x="3" y="14" width="7" height="7"/>
+                                <rect x="14" y="14" width="7" height="7"/>
+                            </svg>
+                        </button>
+                        <button class="view-btn" data-view="list" title="Список">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <line x1="3" y1="6" x2="21" y2="6"/>
+                                <line x1="3" y1="12" x2="21" y2="12"/>
+                                <line x1="3" y1="18" x2="21" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="sort-dropdown">
+                        <select id="sort-select" class="sort-select">
+                            <option value="newest">Спочатку нові</option>
+                            <option value="price-low">Ціна: від низької</option>
+                            <option value="price-high">Ціна: від високої</option>
+                            <option value="area-large">Площа: від великої</option>
+                            <option value="area-small">Площа: від малої</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- ГОРИЗОНТАЛЬНОЕ МЕНЮ С БЫСТРЫМИ ФИЛЬТРАМИ -->
@@ -45,12 +111,33 @@
                 <div class="quick-filters-container">
                     <!-- Типи нерухомості -->
                     <div class="quick-filter-group">
-                        <button class="quick-filter-btn active" data-type="apartment">Квартира</button>
-                        <button class="quick-filter-btn" data-type="house">Будинок</button>
-                        <button class="quick-filter-btn" data-type="commercial">Комерція</button>
-                        <button class="quick-filter-btn" data-type="office">Офіс</button>
-                        <button class="quick-filter-btn" data-type="land">Земля</button>
-                        <button class="quick-filter-btn" data-type="warehouse">Нежитлове</button>
+                        <span class="filter-group-label">Тип нерухомості:</span>
+                        <div class="filter-buttons">
+                            <button class="quick-filter-btn active" data-type="apartment">
+                                <span class="btn-icon">🏠</span>
+                                <span>Квартира</span>
+                            </button>
+                            <button class="quick-filter-btn" data-type="house">
+                                <span class="btn-icon">🏡</span>
+                                <span>Будинок</span>
+                            </button>
+                            <button class="quick-filter-btn" data-type="commercial">
+                                <span class="btn-icon">🏪</span>
+                                <span>Комерція</span>
+                            </button>
+                            <button class="quick-filter-btn" data-type="office">
+                                <span class="btn-icon">🏢</span>
+                                <span>Офіс</span>
+                            </button>
+                            <button class="quick-filter-btn" data-type="land">
+                                <span class="btn-icon">🌾</span>
+                                <span>Земля</span>
+                            </button>
+                            <button class="quick-filter-btn" data-type="warehouse">
+                                <span class="btn-icon">🏭</span>
+                                <span>Нежитлове</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -58,16 +145,98 @@
             <div class="catalog-layout">
                 <!-- Левая колонка - Кнопочные фильтры -->
                 <aside class="filters-sidebar">
-                    <h3>Фільтри</h3>
-                    
-                    <!-- Города (в обраній області) -->
-                    <div class="filter-section">
-                        <h4>📍 Місто</h4>
-                        <div class="filter-buttons" id="city-buttons"></div>
+                    <div class="filters-header">
+                        <h3>Фільтри</h3>
+                        <button class="filters-toggle" id="filters-toggle">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 17h18v-2H3v2zm0-5h18V7H3v5zm0-7v2h18V5H3z"/>
+                            </svg>
+                        </button>
                     </div>
+                    
+                    <div class="filters-content" id="filters-content">
+                        <!-- Города (в обраній області) -->
+                        <div class="filter-section">
+                            <h4>📍 Місто</h4>
+                            <div class="filter-buttons" id="city-buttons"></div>
+                        </div>
 
-                    <!-- Кнопка сброса -->
-                    <button class="btn btn-secondary" onclick="resetFilters()" style="width: 100%; margin-top: 20px;">Скинути все</button>
+                        <!-- Ценовой диапазон -->
+                        <div class="filter-section">
+                            <h4>💰 Ціна</h4>
+                            <div class="price-range">
+                                <div class="price-inputs">
+                                    <input type="number" id="price-min" placeholder="Від" class="price-input">
+                                    <span class="price-separator">—</span>
+                                    <input type="number" id="price-max" placeholder="До" class="price-input">
+                                </div>
+                                <div class="price-slider">
+                                    <input type="range" id="price-range" min="0" max="1000" value="500" class="range-slider">
+                                    <div class="price-labels">
+                                        <span>0</span>
+                                        <span>1000</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Площадь -->
+                        <div class="filter-section">
+                            <h4>📐 Площа</h4>
+                            <div class="area-range">
+                                <div class="area-inputs">
+                                    <input type="number" id="area-min" placeholder="Від м²" class="area-input">
+                                    <span class="area-separator">—</span>
+                                    <input type="number" id="area-max" placeholder="До м²" class="area-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Количество комнат -->
+                        <div class="filter-section">
+                            <h4>🚪 Кімнат</h4>
+                            <div class="rooms-filter">
+                                <button class="room-btn" data-rooms="1">1</button>
+                                <button class="room-btn" data-rooms="2">2</button>
+                                <button class="room-btn" data-rooms="3">3</button>
+                                <button class="room-btn" data-rooms="4">4</button>
+                                <button class="room-btn" data-rooms="5">5+</button>
+                            </div>
+                        </div>
+
+                        <!-- Дополнительные опции -->
+                        <div class="filter-section">
+                            <h4>✨ Додатково</h4>
+                            <div class="checkbox-filters">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="balcony">
+                                    <span class="checkmark"></span>
+                                    <span class="checkbox-label">Балкон</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="parking">
+                                    <span class="checkmark"></span>
+                                    <span class="checkbox-label">Паркінг</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="elevator">
+                                    <span class="checkmark"></span>
+                                    <span class="checkbox-label">Ліфт</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="furnished">
+                                    <span class="checkmark"></span>
+                                    <span class="checkbox-label">Меблі</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Кнопки управления -->
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" onclick="applyFilters()">Застосувати</button>
+                            <button class="btn btn-secondary" onclick="resetFilters()">Скинути все</button>
+                        </div>
+                    </div>
                 </aside>
 
                 <!-- Центральная колонка - Таблица и объекты -->
@@ -127,12 +296,40 @@
                     <!-- Telegram Кнопка -->
                     <div id="telegram-button" style="display: none; text-align: center; margin-bottom: 30px;"></div>
 
+                    <!-- Результаты поиска -->
+                    <div class="results-header">
+                        <div class="results-info">
+                            <span class="results-count" id="results-count">Знайдено 0 об'єктів</span>
+                            <div class="active-filters" id="active-filters"></div>
+                        </div>
+                        <div class="results-actions">
+                            <button class="btn btn-outline" onclick="clearAllFilters()">Очистити фільтри</button>
+                        </div>
+                    </div>
+
                     <!-- Каталог об'єктів -->
                     <div class="properties-grid" id="properties-grid"></div>
 
+                    <!-- Загрузка -->
+                    <div class="loading-spinner" id="loading-spinner" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Завантаження...</p>
+                    </div>
+
                     <!-- Кнопка "Показати ще" -->
                     <div id="load-more-container" style="text-align: center; margin-top: 40px;">
-                        <button class="btn btn-primary btn-large" id="load-more-btn" onclick="loadMoreProperties()">Показати ще</button>
+                        <button class="btn btn-primary btn-large" id="load-more-btn" onclick="loadMoreProperties()">
+                            <span>Показати ще</span>
+                            <div class="btn-icon">↓</div>
+                        </button>
+                    </div>
+
+                    <!-- Пустое состояние -->
+                    <div class="empty-state" id="empty-state" style="display: none;">
+                        <div class="empty-icon">🔍</div>
+                        <h3>Нічого не знайдено</h3>
+                        <p>Спробуйте змінити параметри пошуку або очистити фільтри</p>
+                        <button class="btn btn-primary" onclick="resetFilters()">Очистити фільтри</button>
                     </div>
                 </div>
             </div>
