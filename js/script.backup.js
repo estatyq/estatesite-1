@@ -306,8 +306,35 @@ function generateProperties() {
   let id = 1;
   
   Object.entries(cities).forEach(([cityKey]) => {
+    // Отримуємо дані міста
+    const regionKey = cities[cityKey].region;
+    const regionData = regions[regionKey];
+    const cityData = regionData.cities[cityKey];
+    
+    // Визначаємо чи місто має метро
+    const hasMetro = cityData.hasMetro;
+    let allMetroStations = [];
+    if (hasMetro && cityData.metroLines) {
+      // Збираємо всі станції метро в єдиний масив
+      Object.values(cityData.metroLines).forEach(stations => {
+        allMetroStations.push(...stations);
+      });
+    }
+    
     // Квартири
     for (let i = 0; i < 30; i++) {
+      const floorsTotal = Math.floor(5 + Math.random() * 20); // Загальна кількість поверхів
+      const floor = Math.floor(1 + Math.random() * floorsTotal);
+      const yearBuilt = 1990 + Math.floor(Math.random() * 35);
+      
+      // Випадково визначаємо чи квартира біля метро (тільки для міст з метро)
+      let metroStation = null;
+      let isNearMetro = false;
+      if (hasMetro && allMetroStations.length > 0 && Math.random() > 0.4) {
+        metroStation = allMetroStations[Math.floor(Math.random() * allMetroStations.length)];
+        isNearMetro = true;
+      }
+      
       properties.push({
         id: id++,
         title: `Квартира ${id}`,
@@ -319,10 +346,18 @@ function generateProperties() {
         price: Math.random() > 0.5 ? Math.floor(50 + Math.random() * 150) : Math.floor(15 + Math.random() * 30),
         rooms: Math.floor(Math.random() * 5),
         area: Math.floor(35 + Math.random() * 150),
-        floor: Math.floor(1 + Math.random() * 20),
-        building: 1990 + Math.floor(Math.random() * 35),
+        floor: floor,
+        floorsTotal: floorsTotal,
+        building: yearBuilt,
+        yearBuilt: yearBuilt,
         image: `https://via.placeholder.com/400x300?text=Квартира+${id}`,
         daily: false,
+        // Нові поля
+        metro: metroStation,
+        metroStation: metroStation,
+        isNearMetro: isNearMetro,
+        parking: Math.random() > 0.5,
+        balcony: Math.random() > 0.4,
         // Поля для оренди
         waterHeater: Math.random() > 0.5 ? "так" : "ні",
         microwave: Math.random() > 0.5 ? "так" : "ні",
@@ -335,6 +370,8 @@ function generateProperties() {
     
     // Дома
     for (let i = 0; i < 15; i++) {
+      const yearBuilt = 1985 + Math.floor(Math.random() * 40);
+      
       properties.push({
         id: id++,
         title: `Дім ${id}`,
@@ -347,16 +384,36 @@ function generateProperties() {
         rooms: Math.floor(2 + Math.random() * 4),
         area: Math.floor(150 + Math.random() * 300),
         floor: 2,
-        building: 1985 + Math.floor(Math.random() * 40),
+        floorsTotal: 2,
+        building: yearBuilt,
+        yearBuilt: yearBuilt,
         image: `https://via.placeholder.com/400x300?text=Дім+${id}`,
         daily: false,
         plotArea: Math.floor(5 + Math.random() * 50),
-        monthlyRent: Math.random() > 0.7
+        monthlyRent: Math.random() > 0.7,
+        // Нові поля
+        metro: null,
+        metroStation: null,
+        isNearMetro: false,
+        parking: Math.random() > 0.3, // У будинків частіше є паркінг
+        balcony: Math.random() > 0.5
       });
     }
     
     // Подобово - Квартири (денна оренда)
     for (let i = 0; i < 15; i++) {
+      const floorsTotal = Math.floor(5 + Math.random() * 20);
+      const floor = Math.floor(1 + Math.random() * floorsTotal);
+      const yearBuilt = 1990 + Math.floor(Math.random() * 35);
+      
+      // Випадково визначаємо чи квартира біля метро
+      let metroStation = null;
+      let isNearMetro = false;
+      if (hasMetro && allMetroStations.length > 0 && Math.random() > 0.4) {
+        metroStation = allMetroStations[Math.floor(Math.random() * allMetroStations.length)];
+        isNearMetro = true;
+      }
+      
       properties.push({
         id: id++,
         title: `Квартира ${id} (подобово)`,
@@ -368,15 +425,25 @@ function generateProperties() {
         price: Math.floor(30 + Math.random() * 100),
         rooms: Math.floor(Math.random() * 4),
         area: Math.floor(40 + Math.random() * 120),
-        floor: Math.floor(1 + Math.random() * 20),
-        building: 1990 + Math.floor(Math.random() * 35),
+        floor: floor,
+        floorsTotal: floorsTotal,
+        building: yearBuilt,
+        yearBuilt: yearBuilt,
         image: `https://via.placeholder.com/400x300?text=Квартира+подобово+${id}`,
-        daily: true
+        daily: true,
+        // Нові поля
+        metro: metroStation,
+        metroStation: metroStation,
+        isNearMetro: isNearMetro,
+        parking: Math.random() > 0.5,
+        balcony: Math.random() > 0.4
       });
     }
     
     // Подобово - Дома (денна оренда)
     for (let i = 0; i < 10; i++) {
+      const yearBuilt = 1985 + Math.floor(Math.random() * 40);
+      
       properties.push({
         id: id++,
         title: `Дім ${id} (подобово)`,
@@ -389,14 +456,26 @@ function generateProperties() {
         rooms: Math.floor(2 + Math.random() * 3),
         area: Math.floor(180 + Math.random() * 250),
         floor: 2,
-        building: 1985 + Math.floor(Math.random() * 40),
+        floorsTotal: 2,
+        building: yearBuilt,
+        yearBuilt: yearBuilt,
         image: `https://via.placeholder.com/400x300?text=Дім+подобово+${id}`,
-        daily: true
+        daily: true,
+        // Нові поля
+        metro: null,
+        metroStation: null,
+        isNearMetro: false,
+        parking: Math.random() > 0.3,
+        balcony: Math.random() > 0.5
       });
     }
     
     // Подобово - Офіси (денна оренда)
     for (let i = 0; i < 8; i++) {
+      const floorsTotal = Math.floor(5 + Math.random() * 20);
+      const floor = Math.floor(1 + Math.random() * floorsTotal);
+      const yearBuilt = 2000 + Math.floor(Math.random() * 25);
+      
       properties.push({
         id: id++,
         title: `Офіс ${id} (подобово)`,
@@ -408,15 +487,27 @@ function generateProperties() {
         price: Math.floor(40 + Math.random() * 120),
         rooms: Math.floor(1 + Math.random() * 3),
         area: Math.floor(20 + Math.random() * 100),
-        floor: Math.floor(1 + Math.random() * 15),
-        building: 2000 + Math.floor(Math.random() * 25),
+        floor: floor,
+        floorsTotal: floorsTotal,
+        building: yearBuilt,
+        yearBuilt: yearBuilt,
         image: `https://via.placeholder.com/400x300?text=Офіс+подобово+${id}`,
-        daily: true
+        daily: true,
+        // Нові поля
+        metro: null,
+        metroStation: null,
+        isNearMetro: false,
+        parking: Math.random() > 0.6, // Офіси часто мають паркінг
+        balcony: false
       });
     }
     
     // Офіси (продаж і оренда)
     for (let i = 0; i < 10; i++) {
+      const floorsTotal = Math.floor(5 + Math.random() * 20);
+      const floor = Math.floor(1 + Math.random() * floorsTotal);
+      const yearBuilt = 2000 + Math.floor(Math.random() * 25);
+      
       properties.push({
         id: id++,
         title: `Офіс ${id}`,
@@ -427,16 +518,28 @@ function generateProperties() {
         location: locations[cityKey][Math.floor(Math.random() * locations[cityKey].length)],
         price: Math.random() > 0.5 ? Math.floor(80 + Math.random() * 250) : Math.floor(30 + Math.random() * 100),
         area: Math.floor(20 + Math.random() * 200),
-        floor: Math.floor(1 + Math.random() * 15),
-        building: 2000 + Math.floor(Math.random() * 25),
+        floor: floor,
+        floorsTotal: floorsTotal,
+        building: yearBuilt,
+        yearBuilt: yearBuilt,
         image: `https://via.placeholder.com/400x300?text=Офіс+${id}`,
         daily: false,
-        officeType: ["відкритий простір", "кабінет", "індивідуальний"][Math.floor(Math.random() * 3)]
+        officeType: ["відкритий простір", "кабінет", "індивідуальний"][Math.floor(Math.random() * 3)],
+        // Нові поля
+        metro: null,
+        metroStation: null,
+        isNearMetro: false,
+        parking: Math.random() > 0.6,
+        balcony: false
       });
     }
     
     // Комерція (продаж і оренда)
     for (let i = 0; i < 8; i++) {
+      const floorsTotal = Math.floor(1 + Math.random() * 10);
+      const floor = Math.floor(1 + Math.random() * floorsTotal);
+      const yearBuilt = 1995 + Math.floor(Math.random() * 30);
+      
       properties.push({
         id: id++,
         title: `Комерція ${id}`,
@@ -447,11 +550,19 @@ function generateProperties() {
         location: locations[cityKey][Math.floor(Math.random() * locations[cityKey].length)],
         price: Math.random() > 0.5 ? Math.floor(100 + Math.random() * 300) : Math.floor(40 + Math.random() * 150),
         area: Math.floor(20 + Math.random() * 300),
-        floor: Math.floor(1 + Math.random() * 10),
-        building: 1995 + Math.floor(Math.random() * 30),
+        floor: floor,
+        floorsTotal: floorsTotal,
+        building: yearBuilt,
+        yearBuilt: yearBuilt,
         image: `https://via.placeholder.com/400x300?text=Комерція+${id}`,
         daily: false,
-        commercialType: ["магазин", "кафе", "сервіс", "інше"][Math.floor(Math.random() * 4)]
+        commercialType: ["магазин", "кафе", "сервіс", "інше"][Math.floor(Math.random() * 4)],
+        // Нові поля
+        metro: null,
+        metroStation: null,
+        isNearMetro: false,
+        parking: Math.random() > 0.7, // Комерція часто має паркінг
+        balcony: false
       });
     }
     
@@ -468,16 +579,26 @@ function generateProperties() {
         price: Math.random() > 0.5 ? Math.floor(200 + Math.random() * 500) : Math.floor(50 + Math.random() * 200),
         area: Math.floor(50 + Math.random() * 200),
         floor: 1,
+        floorsTotal: 1,
         building: 2000,
+        yearBuilt: 2000,
         image: `https://via.placeholder.com/400x300?text=Земля+${id}`,
         daily: false,
         plotArea: Math.floor(10 + Math.random() * 100),
-        landType: ["під забудову", "промислова", "сільськогосподарська"][Math.floor(Math.random() * 3)]
+        landType: ["під забудову", "промислова", "сільськогосподарська"][Math.floor(Math.random() * 3)],
+        // Нові поля
+        metro: null,
+        metroStation: null,
+        isNearMetro: false,
+        parking: false,
+        balcony: false
       });
     }
     
     // Виробничої/промислові приміщення (продаж і оренда)
     for (let i = 0; i < 6; i++) {
+      const yearBuilt = 1990 + Math.floor(Math.random() * 35);
+      
       properties.push({
         id: id++,
         title: `Склад/Виробництво ${id}`,
@@ -489,11 +610,19 @@ function generateProperties() {
         price: Math.random() > 0.5 ? Math.floor(150 + Math.random() * 400) : Math.floor(60 + Math.random() * 180),
         area: Math.floor(100 + Math.random() * 500),
         floor: 1,
-        building: 1990 + Math.floor(Math.random() * 35),
+        floorsTotal: 1,
+        building: yearBuilt,
+        yearBuilt: yearBuilt,
         image: `https://via.placeholder.com/400x300?text=Склад+${id}`,
         daily: false,
         plotArea: Math.floor(5 + Math.random() * 100),
-        warehouseType: ["склад", "виробництво", "логістика"][Math.floor(Math.random() * 3)]
+        warehouseType: ["склад", "виробництво", "логістика"][Math.floor(Math.random() * 3)],
+        // Нові поля
+        metro: null,
+        metroStation: null,
+        isNearMetro: false,
+        parking: Math.random() > 0.8, // Склади часто мають паркінг
+        balcony: false
       });
     }
   });
@@ -511,7 +640,7 @@ let filters = {
   city: null,
   districts: [],
   microdistricts: [],
-  metro: null, // Станція метро
+  metroStations: [], // Масив вибраних станцій метро (замість metro)
   transaction: null,
   type: null,
   location: null,
@@ -768,9 +897,6 @@ function selectCity(cityKey) {
   renderDistrictChips();
   renderMicrodistricts();
   renderMetro();
-  
-  // Update Telegram button for new city
-  updateTelegramButton();
   
   applyFilters();
 }
@@ -1033,8 +1159,10 @@ function applyFilters() {
     // Фільтр по мікрорайонам (тільки для міст)
     if (filters.microdistricts.length > 0 && !filters.microdistricts.includes(prop.location)) return false;
     
-    // Фільтр по станціям метро
-    if (filters.metroStations && filters.metroStations.length > 0 && (!prop.metro || !filters.metroStations.includes(prop.metro))) return false;
+    // Фільтр по станціям метро (якщо вибрані конкретні станції)
+    if (filters.metroStations && filters.metroStations.length > 0) {
+      if (!prop.metro || !filters.metroStations.includes(prop.metro)) return false;
+    }
     
     // Фільтр по локації
     if (filters.location && prop.location !== filters.location) return false;
@@ -1090,12 +1218,6 @@ function applyFilters() {
   displayedCount = 12;
   renderProperties(filtered);
   filteredProperties = filtered;
-  
-  // Ensure Telegram button is up to date
-  updateTelegramButton();
-  
-  // Update URL to reflect current state
-  updateURLState();
 }
 
 // Оновлення відображення активних фільтрів
@@ -1450,24 +1572,11 @@ function renderProperties() {
 }
 
 function loadMoreProperties() {
-  const oldCount = lastRenderedCount;
   displayedCount += INCREMENT;
+  renderProperties();
   
-  // Рендеримо тільки нові карточки (без повного перерендера)
-  renderProperties(false);
-  
-  // Плавна прокрутка тільки якщо додалися нові елементи
-  if (lastRenderedCount > oldCount) {
-    // Використовуємо requestAnimationFrame для кращої продуктивності
-    requestAnimationFrame(() => {
-      const grid = document.getElementById("properties-grid");
-      const cards = grid.children;
-      // Прокручуємо до першого нового елемента
-      if (cards[oldCount]) {
-        cards[oldCount].scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }
-    });
-  }
+  // Плавная прокрутка
+  document.getElementById("properties-grid").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 // ==================== МОДАЛЬНОЕ ОКНО ====================
@@ -1913,6 +2022,7 @@ document.addEventListener("DOMContentLoaded", function() {
   // Рендеримо властивості
   renderProperties();
 });
+
 // ==================== БЫСТРЫЕ ФИЛЬТРЫ ВВЕРХУ ====================
 
 function setupQuickFilters() {
@@ -1977,5 +2087,3 @@ function getCityData() {
   }
   return null;
 }
-
-

@@ -1,0 +1,264 @@
+{
+  "id": "id",
+  "type": "type",
+  "transactionType": "deal",
+  "rooms": "rooms",
+  "kvadratura": "area.total",
+  "price": "price.value",
+  "currency": "price.currency",
+  "floor": "floor",
+  "yearBuilt": "yearBuilt",
+  "city": "location.city",
+  "region": "location.region",
+  "district": "location.district",
+  "microdistrict": "location.microdistrict",
+  "address": "location.address",
+  "lat": "geo.lat",
+  "lng": "geo.lng",
+  "balcony": "amenities.balcony",
+  "parking": "amenities.parking",
+  "metro": "amenities.metro",
+  "image": "images[0]"
+}
+
+{
+  "description": "Field mapping configuration for XML to JSON conversion",
+  "version": "1.0",
+  "lastUpdated": "2025-10-28",
+  "mappings": {
+    "id": {
+      "xmlPath": "listing/id",
+      "type": "string",
+      "required": true,
+      "description": "Unique identifier from XML source"
+    },
+    "type": {
+      "xmlPath": "listing/propertyType",
+      "type": "string",
+      "required": true,
+      "enum": ["apartment", "house", "commercial", "office", "land", "warehouse"],
+      "description": "Property type with validation"
+    },
+    "transactionType": {
+      "xmlPath": "listing/saleType",
+      "type": "string",
+      "required": true,
+      "enum": ["sale", "rent", "daily"],
+      "transform": "lowercase",
+      "description": "Transaction type (sale/rent/daily)"
+    },
+    "price.value": {
+      "xmlPath": "listing/price/amount",
+      "type": "number",
+      "required": true,
+      "transform": "toFloat",
+      "description": "Price amount - will be divided by 1000 if source is in USD"
+    },
+    "price.currency": {
+      "xmlPath": "listing/price/currency",
+      "type": "string",
+      "default": "USD",
+      "enum": ["USD", "UAH", "EUR"],
+      "description": "Currency code"
+    },
+    "area.total": {
+      "xmlPath": "listing/area/total",
+      "type": "number",
+      "transform": "toFloat",
+      "description": "Total area in m²"
+    },
+    "area.living": {
+      "xmlPath": "listing/area/living",
+      "type": "number",
+      "transform": "toFloat",
+      "description": "Living area in m² (optional)"
+    },
+    "area.plot": {
+      "xmlPath": "listing/area/plot",
+      "type": "number",
+      "transform": "toFloat",
+      "description": "Plot area (optional)"
+    },
+    "rooms": {
+      "xmlPath": "listing/rooms",
+      "type": "integer",
+      "transform": "toInt",
+      "description": "Number of rooms"
+    },
+    "floor.current": {
+      "xmlPath": "listing/floor",
+      "type": "integer",
+      "transform": "toInt",
+      "description": "Current floor"
+    },
+    "floor.total": {
+      "xmlPath": "listing/totalFloors",
+      "type": "integer",
+      "transform": "toInt",
+      "description": "Total floors in building"
+    },
+    "yearBuilt": {
+      "xmlPath": "listing/yearBuilt",
+      "type": "integer",
+      "transform": "toInt",
+      "description": "Year property was built"
+    },
+    "location.country": {
+      "xmlPath": "listing/location/country",
+      "type": "string",
+      "default": "Ukraine",
+      "description": "Country name"
+    },
+    "location.region": {
+      "xmlPath": "listing/location/region",
+      "type": "string",
+      "description": "Regional administrative division"
+    },
+    "location.city": {
+      "xmlPath": "listing/location/city",
+      "type": "string",
+      "required": true,
+      "description": "City name"
+    },
+    "location.cityKey": {
+      "xmlPath": "listing/location/city",
+      "type": "string",
+      "required": true,
+      "enum": ["kyiv", "kharkiv", "odesa", "lviv", "dnipro", "zaporizhzhia", "ivano_frankivsk"],
+      "transform": "cityNameToCityKey",
+      "description": "Standardized city key - auto-generated from city name"
+    },
+    "location.district": {
+      "xmlPath": "listing/location/district",
+      "type": "string",
+      "description": "District name"
+    },
+    "location.microdistrict": {
+      "xmlPath": "listing/location/microdistrict",
+      "type": "string",
+      "description": "Microdistrict name"
+    },
+    "location.address": {
+      "xmlPath": "listing/location/address",
+      "type": "string",
+      "description": "Full street address"
+    },
+    "location.geo.lat": {
+      "xmlPath": "listing/location/latitude",
+      "type": "number",
+      "transform": "toFloat",
+      "description": "Latitude coordinate"
+    },
+    "location.geo.lng": {
+      "xmlPath": "listing/location/longitude",
+      "type": "number",
+      "transform": "toFloat",
+      "description": "Longitude coordinate"
+    },
+    "amenities.balcony": {
+      "xmlPath": "listing/amenities/balcony",
+      "type": "boolean",
+      "transform": "toBoolean",
+      "description": "Has balcony"
+    },
+    "amenities.parking": {
+      "xmlPath": "listing/amenities/parking",
+      "type": "boolean",
+      "transform": "toBoolean",
+      "description": "Has parking"
+    },
+    "amenities.metro": {
+      "xmlPath": "listing/amenities/nearestMetro",
+      "type": ["string", "null"],
+      "description": "Nearest metro station name"
+    },
+    "amenities.features": {
+      "xmlPath": "listing/amenities/features/feature",
+      "type": "array",
+      "itemType": "string",
+      "description": "Additional features list"
+    },
+    "images": {
+      "xmlPath": "listing/images/image/url",
+      "type": "array",
+      "itemType": "string",
+      "description": "Array of image URLs"
+    },
+    "contact.phone": {
+      "xmlPath": "listing/contact/phone",
+      "type": "string",
+      "transform": "normalizePhone",
+      "description": "Contact phone number"
+    },
+    "contact.email": {
+      "xmlPath": "listing/contact/email",
+      "type": "string",
+      "transform": "toLowerCase",
+      "description": "Contact email address"
+    },
+    "contact.name": {
+      "xmlPath": "listing/contact/name",
+      "type": "string",
+      "description": "Contact person name"
+    },
+    "description": {
+      "xmlPath": "listing/description",
+      "type": "string",
+      "description": "Property description"
+    },
+    "createdAt": {
+      "xmlPath": "listing/createdAt",
+      "type": "string",
+      "transform": "toISO8601",
+      "description": "Creation timestamp"
+    },
+    "updatedAt": {
+      "xmlPath": "listing/updatedAt",
+      "type": "string",
+      "transform": "toISO8601",
+      "description": "Last update timestamp"
+    }
+  },
+  "transforms": {
+    "toFloat": "parseFloat(value)",
+    "toInt": "parseInt(value, 10)",
+    "toBoolean": "Boolean(value) && value !== 'false' && value !== '0'",
+    "toLowerCase": "value.toLowerCase()",
+    "lowercase": "value.toLowerCase()",
+    "toISO8601": "new Date(value).toISOString()",
+    "normalizePhone": "value.replace(/[\\s()-]/g, '').match(/^\\+?[0-9]{10,}$/) ? value : null",
+    "cityNameToCityKey": "cityNameToCityKeyMap[value.toLowerCase()] || value.toLowerCase()"
+  },
+  "cityMapping": {
+    "київ": "kyiv",
+    "kyiv": "kyiv",
+    "киев": "kyiv",
+    "kharkiv": "kharkiv",
+    "харків": "kharkiv",
+    "харьков": "kharkiv",
+    "odesa": "odesa",
+    "одеса": "odesa",
+    "одесса": "odesa",
+    "lviv": "lviv",
+    "львів": "lviv",
+    "львов": "lviv",
+    "dnipro": "dnipro",
+    "дніпро": "dnipro",
+    "днепр": "dnipro",
+    "запоріжжя": "zaporizhzhia",
+    "zaporizhzhia": "zaporizhzhia",
+    "запорожье": "zaporizhzhia",
+    "івано-франківськ": "ivano_frankivsk",
+    "ivano-frankivsk": "ivano_frankivsk",
+    "ivano_frankivsk": "ivano_frankivsk"
+  },
+  "notes": {
+    "dotPath": "Use dot notation for nested properties (e.g., 'price.value')",
+    "xmlPath": "XPath expression for locating value in XML (e.g., 'listing/price/amount')",
+    "transform": "Function name or expression to transform the value",
+    "required": "Field is mandatory for valid listing",
+    "default": "Default value if XML field is missing",
+    "enum": "Allowed values for validation",
+    "type": "Data type (string, number, integer, boolean, array)"
+  }
+}

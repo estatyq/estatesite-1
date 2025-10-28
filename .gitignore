@@ -27,3 +27,17 @@ npm-debug.log*
 # Temporary files
 *.tmp
 *.temp
+
+# Environment variables (NEVER commit!)
+.env
+.env.local
+.env.*.local
+
+# Node.js
+node_modules/
+package-lock.json
+npm-debug.log
+
+# Build artifacts
+dist/
+build/

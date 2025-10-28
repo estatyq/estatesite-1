@@ -45,10 +45,10 @@
                 <div class="filters-header">
                     <h3>🔍 Розумний пошук нерухомості</h3>
                     <div class="filters-controls">
-                        <button class="btn btn-secondary" onclick="toggleAdvancedFilters()">
+                        <button class="btn btn-secondary" onclick="toggleAdvancedFilters()" aria-label="Розгорнути розширені фільтри">
                             <span id="filters-toggle-text">Розширені фільтри</span>
                         </button>
-                        <button class="btn btn-secondary" onclick="resetAllFilters()">
+                        <button class="btn btn-secondary" onclick="resetAllFilters()" aria-label="Скинути всі активні фільтри">
                             <span>Скинути все</span>
                         </button>
                     </div>
@@ -264,9 +264,15 @@
                         </div>
                         
                         <div class="view-controls">
-                            <button class="view-btn active" data-view="grid" onclick="setView('grid')">⊞</button>
-                            <button class="view-btn" data-view="list" onclick="setView('list')">☰</button>
+                            <button class="view-btn active" data-view="grid" onclick="setView('grid')" aria-pressed="true" aria-label="Сітковий вид">⊞</button>
+                            <button class="view-btn" data-view="list" onclick="setView('list')" aria-pressed="false" aria-label="Список вид">☰</button>
                         </div>
+                    </div>
+
+                    <!-- Результатів лічильник -->
+                    <div id="results-counter" style="text-align: center; padding: 20px 0; color: #666; font-size: 14px;">
+                        <span id="found-count">Знайдено: 0</span>
+                        <span id="pagination-info" style="margin-left: 15px;"></span>
                     </div>
 
                     <!-- Кнопка "Показати ще" -->
@@ -281,7 +287,7 @@
     <!-- Модальне вікно -->
     <div id="modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
+            <button class="close" onclick="closeModal()" aria-label="Закрити модальне вікно">&times;</button>
             <div id="modal-body"></div>
         </div>
     </div>

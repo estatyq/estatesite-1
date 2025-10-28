@@ -1,0 +1,221 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EstatyQ Listings Schema",
+  "description": "Unified JSON schema for real estate listings",
+  "type": "object",
+  "properties": {
+    "listings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "transactionType", "price", "location"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the listing",
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["apartment", "house", "commercial", "office", "land", "warehouse"],
+            "description": "Property type"
+          },
+          "transactionType": {
+            "type": "string",
+            "enum": ["sale", "rent", "daily"],
+            "description": "Type of transaction"
+          },
+          "price": {
+            "type": "object",
+            "required": ["value", "currency"],
+            "properties": {
+              "value": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Price amount (in thousands)"
+              },
+              "currency": {
+                "type": "string",
+                "enum": ["USD", "UAH", "EUR"],
+                "description": "Currency code"
+              }
+            }
+          },
+          "area": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Total area in m²"
+              },
+              "living": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Living area in m²"
+              },
+              "plot": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Plot area (hectares)"
+              }
+            }
+          },
+          "rooms": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20,
+            "description": "Number of rooms"
+          },
+          "floor": {
+            "type": "object",
+            "properties": {
+              "current": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Current floor"
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Total floors in building"
+              }
+            }
+          },
+          "yearBuilt": {
+            "type": "integer",
+            "minimum": 1900,
+            "maximum": 2100,
+            "description": "Year property was built"
+          },
+          "location": {
+            "type": "object",
+            "required": ["country", "city", "cityKey"],
+            "properties": {
+              "country": {
+                "type": "string",
+                "default": "Ukraine"
+              },
+              "region": {
+                "type": "string",
+                "description": "Regional administrative division"
+              },
+              "city": {
+                "type": "string",
+                "description": "City name"
+              },
+              "cityKey": {
+                "type": "string",
+                "enum": ["kyiv", "kharkiv", "odesa", "lviv", "dnipro", "zaporizhzhia", "ivano_frankivsk"],
+                "description": "Standardized city key"
+              },
+              "district": {
+                "type": "string",
+                "description": "District name"
+              },
+              "microdistrict": {
+                "type": "string",
+                "description": "Microdistrict name"
+              },
+              "address": {
+                "type": "string",
+                "description": "Full street address"
+              },
+              "geo": {
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "lng": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  }
+                }
+              }
+            }
+          },
+          "amenities": {
+            "type": "object",
+            "properties": {
+              "balcony": {
+                "type": "boolean"
+              },
+              "parking": {
+                "type": "boolean"
+              },
+              "metro": {
+                "type": ["string", "null"],
+                "description": "Nearest metro station"
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Additional features list"
+              }
+            }
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "description": "Array of image URLs"
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "phone": {
+                "type": "string",
+                "pattern": "^\\+?[0-9\\-\\s()]+$"
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "description": {
+            "type": "string",
+            "description": "Property description"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "totalCount": {
+          "type": "integer"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

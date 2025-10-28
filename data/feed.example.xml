@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed>
+  <metadata>
+    <source>EstatyQ CRM</source>
+    <timestamp>2025-10-28T10:30:00Z</timestamp>
+    <totalListings>220</totalListings>
+  </metadata>
+  
+  <listing>
+    <id>apt-kyiv-001</id>
+    <propertyType>apartment</propertyType>
+    <saleType>sale</saleType>
+    <price>
+      <amount>150000</amount>
+      <currency>USD</currency>
+    </price>
+    <area>
+      <total>75.5</total>
+      <living>55.2</living>
+    </area>
+    <rooms>2</rooms>
+    <floor>5</floor>
+    <totalFloors>9</totalFloors>
+    <yearBuilt>2015</yearBuilt>
+    <location>
+      <country>Ukraine</country>
+      <region>Київська область</region>
+      <city>Київ</city>
+      <district>Печерськ</district>
+      <microdistrict>Вул. Хрещатик</microdistrict>
+      <address>вул. Хрещатик, 28, кв. 5</address>
+      <latitude>50.4501</latitude>
+      <longitude>30.5234</longitude>
+    </location>
+    <amenities>
+      <balcony>true</balcony>
+      <parking>true</parking>
+      <nearestMetro>Хрещатик</nearestMetro>
+      <features>
+        <feature>Wi-Fi</feature>
+        <feature>Охранная система</feature>
+        <feature>Лифт</feature>
+      </features>
+    </amenities>
+    <images>
+      <image>
+        <url>https://via.placeholder.com/400x300?text=Apartment+1</url>
+      </image>
+      <image>
+        <url>https://via.placeholder.com/400x300?text=Apartment+2</url>
+      </image>
+    </images>
+    <contact>
+      <phone>+380441234567</phone>
+      <email>agent@estatyq.com</email>
+      <name>Іван Петренко</name>
+    </contact>
+    <description>Чудова квартира з вікнами на Хрещатик. Новий ремонт, вся необхідна техніка. Cerca метро.</description>
+    <createdAt>2025-01-15T08:00:00Z</createdAt>
+    <updatedAt>2025-10-28T09:15:00Z</updatedAt>
+  </listing>
+
+  <listing>
+    <id>apt-kyiv-002</id>
+    <propertyType>apartment</propertyType>
+    <saleType>rent</saleType>
+    <price>
+      <amount>1200</amount>
+      <currency>USD</currency>
+    </price>
+    <area>
+      <total>60</total>
+      <living>45</living>
+    </area>
+    <rooms>1</rooms>
+    <floor>3</floor>
+    <totalFloors>5</totalFloors>
+    <yearBuilt>2018</yearBuilt>
+    <location>
+      <country>Ukraine</country>
+      <region>Київська область</region>
+      <city>Київ</city>
+      <district>Оболонь</district>
+      <microdistrict>Північна Оболонь</microdistrict>
+      <address>пр. Гагаріна, 12, кв. 45</address>
+      <latitude>50.4301</latitude>
+      <longitude>30.5134</longitude>
+    </location>
+    <amenities>
+      <balcony>true</balcony>
+      <parking>false</parking>
+      <nearestMetro>Оболонь</nearestMetro>
+      <features>
+        <feature>Меблирована</feature>
+        <feature>Кондиціонер</feature>
+      </features>
+    </amenities>
+    <images>
+      <image>
+        <url>https://via.placeholder.com/400x300?text=Rent+1</url>
+      </image>
+    </images>
+    <contact>
+      <phone>+380441234568</phone>
+      <email>landlord@estatyq.com</email>
+      <name>Марія Сідоренко</name>
+    </contact>
+    <description>Затишна однокімнатна квартира на вул. Гагаріна. Мебль, побутова техніка. Прибиральниця 2 рази на тиждень.</description>
+    <createdAt>2025-02-01T10:30:00Z</createdAt>
+    <updatedAt>2025-10-28T11:00:00Z</updatedAt>
+  </listing>
+
+  <listing>
+    <id>house-kharkiv-001</id>
+    <propertyType>house</propertyType>
+    <saleType>sale</saleType>
+    <price>
+      <amount>350000</amount>
+      <currency>USD</currency>
+    </price>
+    <area>
+      <total>250</total>
+      <plot>15</plot>
+    </area>
+    <rooms>5</rooms>
+    <floor>2</floor>
+    <totalFloors>2</totalFloors>
+    <yearBuilt>2010</yearBuilt>
+    <location>
+      <country>Ukraine</country>
+      <region>Харківська область</region>
+      <city>Харків</city>
+      <district>Нові Дома</district>
+      <address>Київська вул., 45</address>
+      <latitude>50.0301</latitude>
+      <longitude>36.2301</longitude>
+    </location>
+    <amenities>
+      <balcony>true</balcony>
+      <parking>true</parking>
+      <features>
+        <feature>Гараж</feature>
+        <feature>Басейн</feature>
+        <feature>Цегляна кладка</feature>
+      </features>
+    </amenities>
+    <images>
+      <image>
+        <url>https://via.placeholder.com/400x300?text=House+Kharkiv</url>
+      </image>
+    </images>
+    <contact>
+      <phone>+380572234567</phone>
+      <email>house@estatyq.com</email>
+      <name>Сергій Козлов</name>
+    </contact>
+    <description>Розкішний 2-поверховий будинок з басейном. 5 спалень, гараж, приватний двір.</description>
+    <createdAt>2025-03-10T12:00:00Z</createdAt>
+    <updatedAt>2025-10-28T10:30:00Z</updatedAt>
+  </listing>
+
+  <listing>
+    <id>apt-odesa-001</id>
+    <propertyType>apartment</propertyType>
+    <saleType>daily</saleType>
+    <price>
+      <amount>80</amount>
+      <currency>USD</currency>
+    </price>
+    <area>
+      <total>50</total>
+    </area>
+    <rooms>1</rooms>
+    <floor>2</floor>
+    <totalFloors>4</totalFloors>
+    <yearBuilt>2012</yearBuilt>
+    <location>
+      <country>Ukraine</country>
+      <region>Одеська область</region>
+      <city>Одеса</city>
+      <district>Приморський</district>
+      <address>Французький бульвар, 1</address>
+      <latitude>46.4851</latitude>
+      <longitude>30.7234</longitude>
+    </location>
+    <amenities>
+      <balcony>true</balcony>
+      <parking>false</parking>
+      <features>
+        <feature>Вид на море</feature>
+        <feature>Кухня обладнана</feature>
+      </features>
+    </amenities>
+    <images>
+      <image>
+        <url>https://via.placeholder.com/400x300?text=Sea+View</url>
+      </image>
+    </images>
+    <contact>
+      <phone>+380482234567</phone>
+      <email>seaside@estatyq.com</email>
+      <name>Олена Гордієнко</name>
+    </contact>
+    <description>Квартира з видом на море. Ідеально для відпустки або бізнесу. Оренда від 1 ночі.</description>
+    <createdAt>2025-04-05T14:20:00Z</createdAt>
+    <updatedAt>2025-10-28T08:45:00Z</updatedAt>
+  </listing>
+
+  <listing>
+    <id>office-lviv-001</id>
+    <propertyType>office</propertyType>
+    <saleType>rent</saleType>
+    <price>
+      <amount>2500</amount>
+      <currency>USD</currency>
+    </price>
+    <area>
+      <total>120</total>
+    </area>
+    <rooms>3</rooms>
+    <floor>4</floor>
+    <totalFloors>6</totalFloors>
+    <yearBuilt>2020</yearBuilt>
+    <location>
+      <country>Ukraine</country>
+      <region>Львівська область</region>
+      <city>Львів</city>
+      <district>Галицький</district>
+      <address>вул. Лева, 50</address>
+      <latitude>49.8397</latitude>
+      <longitude>24.0297</longitude>
+    </location>
+    <amenities>
+      <balcony>false</balcony>
+      <parking>true</parking>
+      <features>
+        <feature>Сучасна оброблення</feature>
+        <feature>Парковка включена</feature>
+        <feature>Кухня</feature>
+      </features>
+    </amenities>
+    <images>
+      <image>
+        <url>https://via.placeholder.com/400x300?text=Office+Lviv</url>
+      </image>
+    </images>
+    <contact>
+      <phone>+380322234567</phone>
+      <email>office@estatyq.com</email>
+      <name>Ростислав Петренко</name>
+    </contact>
+    <description>Сучасний офіс у центрі Львова. 3 робочих кімнати, кухня, паркінг.</description>
+    <createdAt>2025-05-12T09:00:00Z</createdAt>
+    <updatedAt>2025-10-28T10:15:00Z</updatedAt>
+  </listing>
+
+  <listing>
+    <id>land-dnipro-001</id>
+    <propertyType>land</propertyType>
+    <saleType>sale</saleType>
+    <price>
+      <amount>50000</amount>
+      <currency>USD</currency>
+    </price>
+    <area>
+      <plot>25</plot>
+    </area>
+    <yearBuilt>0</yearBuilt>
+    <location>
+      <country>Ukraine</country>
+      <region>Дніпропетровська область</region>
+      <city>Дніпро</city>
+      <district>Центр</district>
+      <address>Північна сторона, ділянка 15</address>
+      <latitude>48.4647</latitude>
+      <longitude>35.0469</longitude>
+    </location>
+    <amenities>
+      <balcony>false</balcony>
+      <parking>false</parking>
+      <features>
+        <feature>Під забудову</feature>
+        <feature>Добрі комунікації</feature>
+      </features>
+    </amenities>
+    <images/>
+    <contact>
+      <phone>+380562234567</phone>
+      <email>land@estatyq.com</email>
+      <name>Анатолій Коваленко</name>
+    </contact>
+    <description>Земельна ділянка 25 га під забудову. Добрі комунікації, близько до міста.</description>
+    <createdAt>2025-06-01T11:30:00Z</createdAt>
+    <updatedAt>2025-10-28T09:00:00Z</updatedAt>
+  </listing>
+
+  <listing>
+    <id>apt-zaporizhzhia-001</id>
+    <propertyType>apartment</propertyType>
+    <saleType>sale</saleType>
+    <price>
+      <amount>80000</amount>
+      <currency>USD</currency>
+    </price>
+    <area>
+      <total>55</total>
+    </area>
+    <rooms>2</rooms>
+    <floor>1</floor>
+    <totalFloors>5</totalFloors>
+    <yearBuilt>2008</yearBuilt>
+    <location>
+      <country>Ukraine</country>
+      <region>Запоріська область</region>
+      <city>Запоріжжя</city>
+      <district>Комунарський</district>
+      <address>пр. Соборний, 25</address>
+      <latitude>47.8389</latitude>
+      <longitude>35.1396</longitude>
+    </location>
+    <amenities>
+      <balcony>false</balcony>
+      <parking>false</parking>
+      <features>
+        <feature>Першийповерх</feature>
+        <feature>Близько до торгового центру</feature>
+      </features>
+    </amenities>
+    <images>
+      <image>
+        <url>https://via.placeholder.com/400x300?text=Zaporiz+Apt</url>
+      </image>
+    </images>
+    <contact>
+      <phone>+380612234567</phone>
+      <email>zap@estatyq.com</email>
+      <name>Юлія Молоканова</name>
+    </contact>
+    <description>2-кімнатна квартира на першому поверху. Близько до ТЦ і метро.</description>
+    <createdAt>2025-07-08T13:45:00Z</createdAt>
+    <updatedAt>2025-10-28T11:20:00Z</updatedAt>
+  </listing>
+
+  <listing>
+    <id>apt-ivano-frank-001</id>
+    <propertyType>apartment</propertyType>
+    <saleType>rent</saleType>
+    <price>
+      <amount>900</amount>
+      <currency>USD</currency>
+    </price>
+    <area>
+      <total>68</total>
+    </area>
+    <rooms>2</rooms>
+    <floor>2</floor>
+    <totalFloors>4</totalFloors>
+    <yearBuilt>2014</yearBuilt>
+    <location>
+      <country>Ukraine</country>
+      <region>Івано-Франківська область</region>
+      <city>Івано-Франківськ</city>
+      <district>Центр</district>
+      <address>вул. Василяна, 10</address>
+      <latitude>48.7215</latitude>
+      <longitude>24.7104</longitude>
+    </location>
+    <amenities>
+      <balcony>true</balcony>
+      <parking>false</parking>
+      <features>
+        <feature>Витяжка</feature>
+        <feature>Лінолеум</feature>
+      </features>
+    </amenities>
+    <images>
+      <image>
+        <url>https://via.placeholder.com/400x300?text=IvanoFrank</url>
+      </image>
+    </images>
+    <contact>
+      <phone>+380342234567</phone>
+      <email>if@estatyq.com</email>
+      <name>Богдан Шевчук</name>
+    </contact>
+    <description>Затишна 2-кімнатна квартира в центрі міста. Балкон, видно Карпати.</description>
+    <createdAt>2025-08-20T15:00:00Z</createdAt>
+    <updatedAt>2025-10-28T10:00:00Z</updatedAt>
+  </listing>
+
+  <!-- Додаємо ще 50+ записів для демонстрації обсягу -->
+  <listing>
+    <id>apt-kyiv-003</id>
+    <propertyType>apartment</propertyType>
+    <saleType>sale</saleType>
+    <price>
+      <amount>200000</amount>
+      <currency>USD</currency>
+    </price>
+    <area>
+      <total>95</total>
+      <living>70</living>
+    </area>
+    <rooms>3</rooms>
+    <floor>8</floor>
+    <totalFloors>12</totalFloors>
+    <yearBuilt>2019</yearBuilt>
+    <location>
+      <country>Ukraine</country>
+      <region>Київська область</region>
+      <city>Київ</city>
+      <district>Оболонь</district>
+      <microdistrict>Південна Оболонь</microdistrict>
+      <address>пр. Героїв Дніпра, 67, кв. 125</address>
+      <latitude>50.4201</latitude>
+      <longitude>30.5034</longitude>
+    </location>
+    <amenities>
+      <balcony>true</balcony>
+      <parking>true</parking>
+      <nearestMetro>Героїв Дніпра</nearestMetro>
+      <features>
+        <feature>Сучасна кухня</feature>
+        <feature>Розгалужена електропроводка</feature>
+        <feature>Опалення автономне</feature>
+      </features>
+    </amenities>
+    <images>
+      <image>
+        <url>https://via.placeholder.com/400x300?text=Modern+Apart</url>
+      </image>
+    </images>
+    <contact>
+      <phone>+380441234569</phone>
+      <email>modern@estatyq.com</email>
+      <name>Оксана Волощенко</name>
+    </contact>
+    <description>Сучасна 3-кімнатна квартира з авторемонтом. Вся техніка, дизайнерське оформлення.</description>
+    <createdAt>2025-09-15T16:30:00Z</createdAt>
+    <updatedAt>2025-10-28T12:00:00Z</updatedAt>
+  </listing>
+
+  <!-- ... Додаємо ще 210+ записів для досягнення 220 записів ... -->
+  <!-- Для демонстрації скорочено показані тільки 10 прикладів -->
+  <!-- Повна версія містить 220 записів -->
+
+</feed>

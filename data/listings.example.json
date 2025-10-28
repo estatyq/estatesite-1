@@ -1,0 +1,433 @@
+[
+  {
+    "id": "apt-kyiv-001",
+    "type": "apartment",
+    "transactionType": "sale",
+    "price": {
+      "value": 150000,
+      "currency": "USD"
+    },
+    "area": {
+      "total": 75.5,
+      "living": 55.2,
+      "plot": null
+    },
+    "rooms": 2,
+    "floor": {
+      "current": 5,
+      "total": 9
+    },
+    "yearBuilt": 2015,
+    "location": {
+      "country": "Ukraine",
+      "region": "Київська область",
+      "city": "Київ",
+      "cityKey": "kyiv",
+      "district": "Печерськ",
+      "microdistrict": "Вул. Хрещатик",
+      "address": "вул. Хрещатик, 28, кв. 5",
+      "geo": {
+        "lat": 50.4501,
+        "lng": 30.5234
+      }
+    },
+    "amenities": {
+      "balcony": true,
+      "parking": true,
+      "metro": "Хрещатик",
+      "features": [
+        "Wi-Fi",
+        "Охранная система",
+        "Лифт"
+      ]
+    },
+    "images": [
+      "https://via.placeholder.com/400x300?text=Apartment+1",
+      "https://via.placeholder.com/400x300?text=Apartment+1+2"
+    ],
+    "contact": {
+      "phone": "+380441234567",
+      "email": "agent@estatyq.com",
+      "name": "Іван Петренко"
+    },
+    "description": "Чудова квартира з вікнами на Хрещатик. Новий ремонт, вся необхідна техніка. Біля метро.",
+    "createdAt": "2025-01-15T08:00:00Z",
+    "updatedAt": "2025-10-28T09:15:00Z"
+  },
+  {
+    "id": "apt-kyiv-002",
+    "type": "apartment",
+    "transactionType": "rent",
+    "price": {
+      "value": 1200,
+      "currency": "USD"
+    },
+    "area": {
+      "total": 55,
+      "living": 42,
+      "plot": null
+    },
+    "rooms": 1,
+    "floor": {
+      "current": 2,
+      "total": 5
+    },
+    "yearBuilt": 2010,
+    "location": {
+      "country": "Ukraine",
+      "region": "Київська область",
+      "city": "Київ",
+      "cityKey": "kyiv",
+      "district": "Оболонь",
+      "microdistrict": "Північна Оболонь",
+      "address": "вул. Декабристів, 15, кв. 23",
+      "geo": {
+        "lat": 50.5001,
+        "lng": 30.4234
+      }
+    },
+    "amenities": {
+      "balcony": true,
+      "parking": false,
+      "metro": "Оболонь",
+      "features": [
+        "Меблирована",
+        "Холодильник",
+        "Стиральна машина"
+      ]
+    },
+    "images": [
+      "https://via.placeholder.com/400x300?text=Apartment+2"
+    ],
+    "contact": {
+      "phone": "+380501234567",
+      "email": "rent@estatyq.com",
+      "name": "Марія Коваленко"
+    },
+    "description": "Затишна 1-кімнатна квартира біля метро Оболонь. Повна комплектація для оренди.",
+    "createdAt": "2025-01-10T10:00:00Z",
+    "updatedAt": "2025-10-27T14:30:00Z"
+  },
+  {
+    "id": "house-kharkiv-001",
+    "type": "house",
+    "transactionType": "sale",
+    "price": {
+      "value": 250000,
+      "currency": "USD"
+    },
+    "area": {
+      "total": 180,
+      "living": 120,
+      "plot": 600
+    },
+    "rooms": 4,
+    "floor": {
+      "current": 2,
+      "total": 2
+    },
+    "yearBuilt": 2008,
+    "location": {
+      "country": "Ukraine",
+      "region": "Харківська область",
+      "city": "Харків",
+      "cityKey": "kharkiv",
+      "district": "Центр",
+      "microdistrict": "Площа Свободи",
+      "address": "вул. Сумська, 42",
+      "geo": {
+        "lat": 50.0015,
+        "lng": 36.2304
+      }
+    },
+    "amenities": {
+      "balcony": false,
+      "parking": true,
+      "metro": "Історичний музей",
+      "features": [
+        "Власна парковка",
+        "Гараж",
+        "Цегляний котедж"
+      ]
+    },
+    "images": [
+      "https://via.placeholder.com/400x300?text=House+1",
+      "https://via.placeholder.com/400x300?text=House+1+Exterior"
+    ],
+    "contact": {
+      "phone": "+380572345678",
+      "email": "house@estatyq.com",
+      "name": "Сергій Ковальчук"
+    },
+    "description": "Двоповерховий цегляний котедж біля центру Харкова. Гарний сад, своя парковка.",
+    "createdAt": "2025-01-20T12:00:00Z",
+    "updatedAt": "2025-10-26T11:00:00Z"
+  },
+  {
+    "id": "apt-odesa-001",
+    "type": "apartment",
+    "transactionType": "sale",
+    "price": {
+      "value": 120000,
+      "currency": "USD"
+    },
+    "area": {
+      "total": 68,
+      "living": 50,
+      "plot": null
+    },
+    "rooms": 2,
+    "floor": {
+      "current": 8,
+      "total": 12
+    },
+    "yearBuilt": 2020,
+    "location": {
+      "country": "Ukraine",
+      "region": "Одеська область",
+      "city": "Одеса",
+      "cityKey": "odesa",
+      "district": "Приморський",
+      "microdistrict": "Французький бульвар",
+      "address": "Французький бульвар, 15, кв. 42",
+      "geo": {
+        "lat": 46.4757,
+        "lng": 30.7361
+      }
+    },
+    "amenities": {
+      "balcony": true,
+      "parking": true,
+      "metro": null,
+      "features": [
+        "Вид на море",
+        "Новобудова",
+        "Клімат-контроль"
+      ]
+    },
+    "images": [
+      "https://via.placeholder.com/400x300?text=Odesa+Sea+View"
+    ],
+    "contact": {
+      "phone": "+380483456789",
+      "email": "odesa@estatyq.com",
+      "name": "Ольга Петренко"
+    },
+    "description": "Сучасна квартира з видом на море на французькому бульварі. Вся інфраструктура.",
+    "createdAt": "2025-01-25T09:30:00Z",
+    "updatedAt": "2025-10-28T08:00:00Z"
+  },
+  {
+    "id": "apt-lviv-001",
+    "type": "apartment",
+    "transactionType": "daily",
+    "price": {
+      "value": 85,
+      "currency": "USD"
+    },
+    "area": {
+      "total": 62,
+      "living": 45,
+      "plot": null
+    },
+    "rooms": 2,
+    "floor": {
+      "current": 3,
+      "total": 4
+    },
+    "yearBuilt": 2012,
+    "location": {
+      "country": "Ukraine",
+      "region": "Львівська область",
+      "city": "Львів",
+      "cityKey": "lviv",
+      "district": "Галицький",
+      "microdistrict": "Центр",
+      "address": "вул. Вірменської, 10, кв. 12",
+      "geo": {
+        "lat": 49.8397,
+        "lng": 24.0297
+      }
+    },
+    "amenities": {
+      "balcony": true,
+      "parking": false,
+      "metro": null,
+      "features": [
+        "В центрі міста",
+        "Вхід з вулиці",
+        "Площа для подій"
+      ]
+    },
+    "images": [
+      "https://via.placeholder.com/400x300?text=Lviv+Apartment"
+    ],
+    "contact": {
+      "phone": "+380322567890",
+      "email": "lviv@estatyq.com",
+      "name": "Ярослав Яремко"
+    },
+    "description": "Уютная квартира в центре Львова, идеальна для туристов и гостей города.",
+    "createdAt": "2025-02-01T07:00:00Z",
+    "updatedAt": "2025-10-28T06:30:00Z"
+  },
+  {
+    "id": "office-dnipro-001",
+    "type": "office",
+    "transactionType": "rent",
+    "price": {
+      "value": 2500,
+      "currency": "USD"
+    },
+    "area": {
+      "total": 120,
+      "living": null,
+      "plot": null
+    },
+    "rooms": 3,
+    "floor": {
+      "current": 5,
+      "total": 10
+    },
+    "yearBuilt": 2018,
+    "location": {
+      "country": "Ukraine",
+      "region": "Дніпропетровська область",
+      "city": "Дніпро",
+      "cityKey": "dnipro",
+      "district": "Центр",
+      "microdistrict": "Січеславський проспект",
+      "address": "Січеславський проспект, 25, офіс 501",
+      "geo": {
+        "lat": 48.4647,
+        "lng": 35.0597
+      }
+    },
+    "amenities": {
+      "balcony": false,
+      "parking": true,
+      "metro": "Площа Соборна",
+      "features": [
+        "Офісні меблі",
+        "Высокая скорость Интернета",
+        "Кухня и столовая"
+      ]
+    },
+    "images": [
+      "https://via.placeholder.com/400x300?text=Office+Space"
+    ],
+    "contact": {
+      "phone": "+380562345678",
+      "email": "office@estatyq.com",
+      "name": "Максим Коваленко"
+    },
+    "description": "Офісне приміщення в центрі Дніпра з усім необхідним для роботи.",
+    "createdAt": "2025-02-05T10:00:00Z",
+    "updatedAt": "2025-10-27T16:00:00Z"
+  },
+  {
+    "id": "land-zaporizhzhia-001",
+    "type": "land",
+    "transactionType": "sale",
+    "price": {
+      "value": 35000,
+      "currency": "USD"
+    },
+    "area": {
+      "total": null,
+      "living": null,
+      "plot": 2000
+    },
+    "rooms": 0,
+    "floor": null,
+    "yearBuilt": null,
+    "location": {
+      "country": "Ukraine",
+      "region": "Запорізька область",
+      "city": "Запоріжжя",
+      "cityKey": "zaporizhzhia",
+      "district": null,
+      "microdistrict": null,
+      "address": "околиці міста Запоріжжя",
+      "geo": {
+        "lat": 47.8388,
+        "lng": 35.1396
+      }
+    },
+    "amenities": {
+      "balcony": false,
+      "parking": false,
+      "metro": null,
+      "features": [
+        "Комунікації поблизу",
+        "Екологічна чистота",
+        "Вода з колодязю"
+      ]
+    },
+    "images": [
+      "https://via.placeholder.com/400x300?text=Land+Plot"
+    ],
+    "contact": {
+      "phone": "+380612456789",
+      "email": "land@estatyq.com",
+      "name": "Наталія Сич"
+    },
+    "description": "Земельна ділянка 2000 кв.м біля міста. Може розроблятися як комерційно, так і для забудови.",
+    "createdAt": "2025-02-10T08:00:00Z",
+    "updatedAt": "2025-10-25T13:00:00Z"
+  },
+  {
+    "id": "commercial-ivano-001",
+    "type": "commercial",
+    "transactionType": "sale",
+    "price": {
+      "value": 180000,
+      "currency": "USD"
+    },
+    "area": {
+      "total": 250,
+      "living": null,
+      "plot": null
+    },
+    "rooms": 0,
+    "floor": {
+      "current": 1,
+      "total": 1
+    },
+    "yearBuilt": 2005,
+    "location": {
+      "country": "Ukraine",
+      "region": "Івано-Франківська область",
+      "city": "Івано-Франківськ",
+      "cityKey": "ivano_frankivsk",
+      "district": null,
+      "microdistrict": null,
+      "address": "вул. Василя Липківського, 88",
+      "geo": {
+        "lat": 48.7259,
+        "lng": 24.7033
+      }
+    },
+    "amenities": {
+      "balcony": false,
+      "parking": true,
+      "metro": null,
+      "features": [
+        "Готовий бізнес",
+        "Велика парковка",
+        "На головній вулиці"
+      ]
+    },
+    "images": [
+      "https://via.placeholder.com/400x300?text=Commercial+Space"
+    ],
+    "contact": {
+      "phone": "+380342567890",
+      "email": "commercial@estatyq.com",
+      "name": "Василь Мазепа"
+    },
+    "description": "Комерційне приміщення на головній вулиці з готовим бізнесом. Усе включено.",
+    "createdAt": "2025-02-15T11:00:00Z",
+    "updatedAt": "2025-10-24T15:00:00Z"
+  }
+]

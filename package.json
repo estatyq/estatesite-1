@@ -2,14 +2,19 @@
   "name": "estatyq-real-estate",
   "version": "1.0.0",
   "description": "EstatyQ - Premium Real Estate Agency Website. Modern, functional, and beautiful.",
-  "main": "index.html",
+  "main": "server.js",
   "scripts": {
-    "start": "python -m http.server 8000",
+    "start": "node server.js",
     "dev": "python -m http.server 8000",
+    "server": "node server.js",
+    "db:init": "node scripts/init-db.js",
+    "db:reset": "node scripts/reset-db.js",
+    "db:seed": "node scripts/sync-xml-to-db.js",
     "build": "echo 'Static site - no build needed'",
     "deploy": "echo 'Deploy to production server'",
     "test": "echo 'Running tests...'",
-    "lint": "echo 'Linting code...'"
+    "lint": "echo 'Linting code...'",
+    "sync:xml": "node scripts/convert-xml-to-json.js \"$XML_URL\" data/mapping.json"
   },
   "keywords": [
     "real-estate",
@@ -20,7 +25,9 @@
     "estatyq",
     "ukraine",
     "responsive",
-    "modern"
+    "modern",
+    "postgresql",
+    "api"
   ],
   "author": "EstatyQ Team",
   "license": "MIT",
@@ -37,8 +44,18 @@
     "node": ">=14.0.0",
     "npm": ">=6.0.0"
   },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "pg": "^8.10.0",
+    "xml2js": "^0.6.2"
+  },
   "devDependencies": {
-    "http-server": "^14.1.1"
+    "fast-xml-parser": "^4.5.3",
+    "http-server": "^14.1.1",
+    "node-fetch": "^2.7.0"
   },
   "browserslist": [
     "> 1%",
@@ -46,5 +63,3 @@
     "not dead"
   ]
 }
-
-

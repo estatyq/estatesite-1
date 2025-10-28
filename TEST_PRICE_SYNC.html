@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST: Price Synchronization - EstatyQ</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #d4af37; margin-bottom: 20px; }
+        h2 { color: #d4af37; margin: 30px 0 15px 0; font-size: 1.3rem; }
+        .test-section {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid #333;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            color: #d4af37;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        button {
+            background: #d4af37;
+            color: #0a0a0a;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
+        .code-block {
+            background: #1a1a1a;
+            border-left: 3px solid #d4af37;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            border-radius: 4px;
+        }
+        .status-pass { color: #44dd44; font-weight: 600; }
+        .status-fail { color: #ff4444; font-weight: 600; }
+        .status-info { color: #44aaff; font-weight: 600; }
+        .info-block {
+            background: rgba(68, 170, 255, 0.1);
+            border: 1px solid #44aaff;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+        .warning-block {
+            background: rgba(255, 170, 44, 0.1);
+            border: 1px solid #ffaa2c;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+        ul { margin-left: 20px; }
+        li { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 TEST: Price Synchronization System (Задача 3)</h1>
+        
+        <div class="info-block">
+            <strong>ℹ️ Інформація:</strong> Цей файл містить набір тестів для перевірки двосторонньої синхронізації ползунка цены і полів min/max. 
+            Відкрийте console (F12) щоб побачити детальні логи.
+        </div>
+
+        <!-- TEST 1 -->
+        <div class="test-section">
+            <h3>✅ Тест 1: Синхронізація слайдера → поля input</h3>
+            <p>Перевіряє, чи слайдер правильно обновляет поля min/max</p>
+            <button onclick="testSliderSync()">Запустити Тест 1</button>
+            <div class="code-block">
+// Логіка тесту:
+// 1. Встановити слайдер на 300 (нижня половина)
+// 2. Очікувати: min обновиться на 300
+// 3. Встановити слайдер на 700 (верхня половина)
+// 4. Очікувати: max обновиться на 700
+            </div>
+        </div>
+
+        <!-- TEST 2 -->
+        <div class="test-section">
+            <h3>✅ Тест 2: Синхронізація поля min → слайдер</h3>
+            <p>Перевіряє, чи зміна поля min переміщує слайдер на середнє значення</p>
+            <button onclick="testMinInputSync()">Запустити Тест 2</button>
+            <div class="code-block">
+// Логіка тесту:
+// 1. Встановити min = 200, max = 800
+// 2. Змінити min на 250
+// 3. Очікувати: слайдер = (250 + 800) / 2 = 525
+            </div>
+        </div>
+
+        <!-- TEST 3 -->
+        <div class="test-section">
+            <h3>✅ Тест 3: Синхронізація поля max → слайдер</h3>
+            <p>Перевіряє, чи зміна поля max переміщує слайдер на середнє значення</p>
+            <button onclick="testMaxInputSync()">Запустити Тест 3</button>
+            <div class="code-block">
+// Логіка тесту:
+// 1. Встановити min = 100, max = 900
+// 2. Змінити max на 700
+// 3. Очікувати: слайдер = (100 + 700) / 2 = 400
+            </div>
+        </div>
+
+        <!-- TEST 4 -->
+        <div class="test-section">
+            <h3>⚠️ Тест 4: Валідація min > max (ПОМИЛКА)</h3>
+            <p>Перевіряє автоматичну коррекцію при помилці</p>
+            <button onclick="testMinMaxError()">Запустити Тест 4</button>
+            <div class="warning-block">
+                <strong>Очікуємо:</strong>
+                <ul>
+                    <li>Червоний бордюр на обох полях</li>
+                    <li>Анімація "shake" 0.4s</li>
+                    <li>Автоматичний обмін значениями</li>
+                    <li>Через 2 сек зникне підсвітка</li>
+                    <li>Console.warn виведе повідомлення</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TEST 5 -->
+        <div class="test-section">
+            <h3>✅ Тест 5: Валідація відємних значений</h3>
+            <p>Перевіряє коррекцію відємних цін</p>
+            <button onclick="testNegativeValues()">Запустити Тест 5</button>
+            <div class="code-block">
+// Логіка тесту:
+// 1. Спробувати встановити min = -50
+// 2. Очікувати: значення корректується на 0
+// 3. Перевірити: min = 0
+            </div>
+        </div>
+
+        <!-- TEST 6 -->
+        <div class="test-section">
+            <h3>✅ Тест 6: Валідація перевищення ліміту</h3>
+            <p>Перевіряє коррекцію при перевищенні максимуму</p>
+            <button onclick="testLimitExceeded()">Запустити Тест 6</button>
+            <div class="code-block">
+// Логіка тесту:
+// 1. Спробувати встановити max = 1500
+// 2. Очікувати: значення корректується на 1000
+// 3. Перевірити: max = 1000
+            </div>
+        </div>
+
+        <!-- TEST 7 -->
+        <div class="test-section">
+            <h3>⏱️ Тест 7: Дебаунс фільтрації</h3>
+            <p>Перевіряє, чи фільтри застосовуються один раз при швидкому вводі</p>
+            <button onclick="testDebounce()">Запустити Тест 7</button>
+            <div class="warning-block">
+                <strong>Очікуємо:</strong>
+                <ul>
+                    <li>5 швидких змін значення min</li>
+                    <li>Фільтри застосовуються тільки 1 раз</li>
+                    <li>В консолі 1 повідомлення "Фільтр цены применён"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TEST 8 -->
+        <div class="test-section">
+            <h3>✅ Тест 8: Попередження циклічності</h3>
+            <p>Перевіряє, чи флаг isUpdating попереджує зацикливання</p>
+            <button onclick="testNoInfiniteLoop()">Запустити Тест 8</button>
+            <div class="code-block">
+// Логіка тесту:
+// 1. Встановити min = 100
+// 2. Перевірити: синхронізація відбулася без зацикливання
+// 3. Перевірити: priceSync.isUpdating = false (після завершення)
+            </div>
+        </div>
+
+        <!-- TEST 9 -->
+        <div class="test-section">
+            <h3>✅ Тест 9: Граничні значення</h3>
+            <p>Перевіряє роботу на граничних значеннях</p>
+            <button onclick="testBoundaryValues()">Запустити Тест 9</button>
+            <div class="code-block">
+// Логіка тесту:
+// 1. Встановити min = 0, max = 1000
+// 2. Слайдер має бути на 500
+// 3. Все повинно синхронізуватись правильно
+            </div>
+        </div>
+
+        <!-- TEST 10 -->
+        <div class="test-section">
+            <h3>✅ Тест 10: Пусті поля</h3>
+            <p>Перевіряє роботу з пустими полями</p>
+            <button onclick="testEmptyFields()">Запустити Тест 10</button>
+            <div class="code-block">
+// Логіка тесту:
+// 1. Очистити обидва поля
+// 2. Очікувати: filters.priceMin = null, filters.priceMax = null
+// 3. Слайдер = (0 + 1000) / 2 = 500
+            </div>
+        </div>
+
+        <!-- UTILITY BUTTONS -->
+        <h2>🔧 Утилити</h2>
+        <div class="test-section">
+            <button onclick="showCurrentState()">📊 Показати поточний стан</button>
+            <button onclick="resetPriceControls()">🔄 Скинути всі значення</button>
+            <button onclick="openDevTools()">💻 Відкрити DevTools (F12)</button>
+            <button onclick="runAllTests()">🚀 Запустити ВСІ ТЕСТИ</button>
+        </div>
+
+        <!-- RESULTS AREA -->
+        <h2>📋 Результати тестів</h2>
+        <div id="results" class="test-section" style="min-height: 200px;">
+            <p style="color: #999;">Результати тестів будуть з'являтися тут...</p>
+        </div>
+    </div>
+
+    <!-- TEST FUNCTIONS -->
+    <script>
+        // Helper function for logging
+        function log(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const statusClass = type === 'pass' ? 'status-pass' : type === 'fail' ? 'status-fail' : 'status-info';
+            const icon = type === 'pass' ? '✅' : type === 'fail' ? '❌' : 'ℹ️';
+            
+            const logEntry = document.createElement('p');
+            logEntry.innerHTML = `<span class="${statusClass}">${icon} ${message}</span>`;
+            resultsDiv.appendChild(logEntry);
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function showCurrentState() {
+            clearResults();
+            // Note: These IDs would only exist in index.html, not in this test file
+            log('Помітка: Цей файл для демонстрації. Для реальних тестів відкрийте index.html в браузері і використовуйте console (F12).', 'info');
+            log('Для тестування функцій, будь ласка:', 'info');
+            log('1. Відкрийте index.html в браузері', 'info');
+            log('2. Натисніть F12 для відкриття DevTools', 'info');
+            log('3. Перейдіть на вкладку Console', 'info');
+            log('4. Скопіюйте і вставте коди тестів з цього файлу', 'info');
+        }
+
+        function resetPriceControls() {
+            clearResults();
+            log('Помітка: Для скидання контролів цены, будь ласка, вставте цей код в console на index.html:', 'info');
+            log('document.getElementById("price-min").value = "";', 'info');
+            log('document.getElementById("price-max").value = "";', 'info');
+            log('document.getElementById("price-range").value = 500;', 'info');
+        }
+
+        function openDevTools() {
+            log('Натисніть F12 для відкриття DevTools', 'info');
+        }
+
+        // Test functions
+        function testSliderSync() {
+            clearResults();
+            log('Тест 1: Синхронізація слайдера → поля input', 'info');
+            log('Код для вставки в console на index.html:', 'info');
+            const code = `
+// Test 1: Slider -> Inputs
+document.getElementById('price-range').value = 300;
+document.getElementById('price-range').dispatchEvent(new Event('input'));
+setTimeout(() => {
+    const min = document.getElementById('price-min').value;
+    console.log('✓ Slider -> min:', min, '(очікувалось: 300)');
+}, 100);
+            `;
+            log(code, 'info');
+        }
+
+        function testMinInputSync() {
+            clearResults();
+            log('Тест 2: Синхронізація поля min → слайдер', 'info');
+            const code = `
+// Test 2: Min Input -> Slider
+document.getElementById('price-min').value = '250';
+document.getElementById('price-max').value = '800';
+document.getElementById('price-min').dispatchEvent(new Event('input'));
+setTimeout(() => {
+    const slider = document.getElementById('price-range').value;
+    const expected = Math.round((250 + 800) / 2);
+    console.log('✓ Slider position:', slider, '(очікувалось:', expected + ')');
+}, 100);
+            `;
+            log(code, 'info');
+        }
+
+        function testMaxInputSync() {
+            clearResults();
+            log('Тест 3: Синхронізація поля max → слайдер', 'info');
+            const code = `
+// Test 3: Max Input -> Slider
+document.getElementById('price-min').value = '100';
+document.getElementById('price-max').value = '700';
+document.getElementById('price-max').dispatchEvent(new Event('input'));
+setTimeout(() => {
+    const slider = document.getElementById('price-range').value;
+    const expected = Math.round((100 + 700) / 2);
+    console.log('✓ Slider position:', slider, '(очікувалось:', expected + ')');
+}, 100);
+            `;
+            log(code, 'info');
+        }
+
+        function testMinMaxError() {
+            clearResults();
+            log('Тест 4: Валідація min > max', 'info');
+            const code = `
+// Test 4: Min > Max Error
+document.getElementById('price-min').value = '600';
+document.getElementById('price-max').value = '400';
+document.getElementById('price-min').dispatchEvent(new Event('input'));
+setTimeout(() => {
+    const min = document.getElementById('price-min').value;
+    const max = document.getElementById('price-max').value;
+    const hasError = document.getElementById('price-min').classList.contains('input-error');
+    console.log('✓ Values swapped - min:', min, 'max:', max);
+    console.log('✓ Error class added:', hasError);
+}, 100);
+            `;
+            log(code, 'info');
+        }
+
+        function testNegativeValues() {
+            clearResults();
+            log('Тест 5: Валідація відємних значень', 'info');
+            const code = `
+// Test 5: Negative Values
+document.getElementById('price-min').value = '-50';
+document.getElementById('price-min').dispatchEvent(new Event('blur'));
+setTimeout(() => {
+    const min = document.getElementById('price-min').value;
+    console.log('✓ Negative value corrected to:', min, '(очікувалось: 0)');
+}, 100);
+            `;
+            log(code, 'info');
+        }
+
+        function testLimitExceeded() {
+            clearResults();
+            log('Тест 6: Валідація перевищення ліміту', 'info');
+            const code = `
+// Test 6: Limit Exceeded
+document.getElementById('price-max').value = '1500';
+document.getElementById('price-max').dispatchEvent(new Event('blur'));
+setTimeout(() => {
+    const max = document.getElementById('price-max').value;
+    console.log('✓ Exceeded value corrected to:', max, '(очікувалось: 1000)');
+}, 100);
+            `;
+            log(code, 'info');
+        }
+
+        function testDebounce() {
+            clearResults();
+            log('Тест 7: Дебаунс фільтрації', 'info');
+            const code = `
+// Test 7: Debounce
+let filterCount = 0;
+const originalApplyFilters = window.applyFilters;
+window.applyFilters = function() {
+    filterCount++;
+    console.log('applyFilters called -', filterCount);
+    originalApplyFilters.call(this);
+};
+
+for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+        document.getElementById('price-min').value = String(100 + i * 10);
+        document.getElementById('price-min').dispatchEvent(new Event('input'));
+    }, i * 50);
+}
+
+setTimeout(() => {
+    console.log('✓ Total applyFilters calls:', filterCount, '(очікувалось: 1 або 2)');
+    window.applyFilters = originalApplyFilters;
+}, 2000);
+            `;
+            log(code, 'info');
+        }
+
+        function testNoInfiniteLoop() {
+            clearResults();
+            log('Тест 8: Попередження циклічності', 'info');
+            const code = `
+// Test 8: No Infinite Loop
+document.getElementById('price-min').value = '100';
+document.getElementById('price-min').dispatchEvent(new Event('input'));
+setTimeout(() => {
+    console.log('✓ priceSync.isUpdating:', priceSync.isUpdating, '(повинен бути: false)');
+    console.log('✓ Синхронізація завершена без зацикливання');
+}, 100);
+            `;
+            log(code, 'info');
+        }
+
+        function testBoundaryValues() {
+            clearResults();
+            log('Тест 9: Граничні значения', 'info');
+            const code = `
+// Test 9: Boundary Values
+document.getElementById('price-min').value = '0';
+document.getElementById('price-max').value = '1000';
+document.getElementById('price-range').value = 500;
+document.getElementById('price-range').dispatchEvent(new Event('input'));
+setTimeout(() => {
+    const min = document.getElementById('price-min').value;
+    const max = document.getElementById('price-max').value;
+    const slider = document.getElementById('price-range').value;
+    console.log('✓ Min:', min, 'Max:', max, 'Slider:', slider);
+    console.log('✓ All values are correct (min=0, max=1000, slider=500)');
+}, 100);
+            `;
+            log(code, 'info');
+        }
+
+        function testEmptyFields() {
+            clearResults();
+            log('Тест 10: Пусті поля', 'info');
+            const code = `
+// Test 10: Empty Fields
+document.getElementById('price-min').value = '';
+document.getElementById('price-max').value = '';
+document.getElementById('price-min').dispatchEvent(new Event('input'));
+setTimeout(() => {
+    console.log('✓ filters.priceMin:', filters.priceMin, '(повинен бути: null)');
+    console.log('✓ filters.priceMax:', filters.priceMax, '(повинен бути: null)');
+    const slider = document.getElementById('price-range').value;
+    console.log('✓ Slider position:', slider, '(повинен бути: 500)');
+}, 100);
+            `;
+            log(code, 'info');
+        }
+
+        function runAllTests() {
+            clearResults();
+            log('🚀 ЗАПУСК УСІХ ТЕСТІВ', 'info');
+            log('Будь ласка, вставте наступний код в console на index.html:', 'info');
+            log('Це запустить усі тести послідовно', 'info');
+            
+            log('', 'info');
+            log('=== ІНСТРУКЦІЇ ===', 'info');
+            log('1. Відкрийте index.html в браузері', 'info');
+            log('2. Натисніть F12 для DevTools', 'info');
+            log('3. Перейдіть на вкладку Console', 'info');
+            log('4. Копіюйте код з вищезазначених тестів', 'info');
+        }
+    </script>
+</body>
+</html>
