@@ -2060,4 +2060,16 @@ function getCityData() {
   return null;
 }
 
+// Перевірка чи об'єкт у улюблених
+function isFavorite(propertyId) {
+  return favorites.includes(propertyId);
+}
+
+// ==================== URL STATE MANAGEMENT (TODO) ====================
+
+function updateURLState() {
+  // TODO: Implement URL state management
+  // This will serialize filters to URL and use history.pushState
+}
+
 
