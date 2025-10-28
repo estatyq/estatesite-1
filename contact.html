@@ -86,13 +86,13 @@
 <body>
     <nav class="navbar">
         <div class="container">
-            <div class="logo">
+            <a href="index.html" class="logo" aria-label="Логотип EstatyQ - На головну">
                 <img src="обрезаный_логотип-removebg-preview.png" alt="ESTATYQ" class="logo-icon-image"/>
                 <div class="logo-text">
                     <h1>ESTATYQ</h1>
                     <p class="logo-tagline">МРІЯ СТАЄ РЕАЛЬНІСТЮ</p>
                 </div>
-            </div>
+            </a>
             <ul class="nav-links">
                 <li><a href="index.html">Каталог</a></li>
                 <li><a href="about.html">Про нас</a></li>
@@ -138,17 +138,17 @@
                 
                 <div class="form-group">
                     <label for="name">Ім'я</label>
-                    <input type="text" id="name" name="name" required placeholder="Ваше ім'я">
+                    <input type="text" id="name" name="name" required placeholder="Ваше ім'я" autocomplete="name">
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                    <input type="email" id="email" name="email" required placeholder="your@email.com" autocomplete="email">
                 </div>
 
                 <div class="form-group">
                     <label for="phone">Телефон</label>
-                    <input type="tel" id="phone" name="phone" placeholder="+380 (__)___ __ __">
+                    <input type="tel" id="phone" name="phone" placeholder="+380 (__)___ __ __" autocomplete="tel">
                 </div>
 
                 <div class="form-group">
@@ -161,7 +161,7 @@
                     <textarea id="message" name="message" required placeholder="Ваше повідомлення..."></textarea>
                 </div>
 
-                <button type="submit" class="submit-btn">Відправити повідомлення</button>
+                <button type="submit" class="submit-btn" aria-label="Відправити повідомлення форму контактів">Відправити повідомлення</button>
             </form>
         </div>
     </section>

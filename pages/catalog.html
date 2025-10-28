@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог нерухомості — EstatyQ | Продаж, оренда, подобово</title>
+    <meta name="description" content="Каталог нерухомості EstatyQ: тисячі пропозицій продажу, оренди та подобової здачі квартир, будинків, офісів і землі. Фільтруйте за ціною, площею, локацією.">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="robots" content="index, follow">
+    <meta name="keywords" content="нерухомість, квартира, будинок, офіс, земля, продаж, оренда, подобово, Україна">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Каталог — EstatyQ">
+    <meta property="og:description" content="Знаходьте ідеальну нерухомість за містом, ціною, площею та іншим. 500+ актуальних пропозицій.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://estatyq.ua/pages/catalog.html">
+    <meta property="og:image" content="https://estatyq.ua/logo.svg">
+    <meta property="og:site_name" content="EstatyQ">
+    <meta property="og:locale" content="uk_UA">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Каталог нерухомості — EstatyQ">
+    <meta name="twitter:description" content="Пошук квартир, будинків, офісів та землі в Україні.">
+    <meta name="twitter:image" content="https://estatyq.ua/logo.svg">
+    
+    <!-- Canonical -->
+    <link rel="canonical" href="https://estatyq.ua/pages/catalog.html">
+    
+    <!-- Icons -->
+    <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../assets/images/favicon.svg">
+    
+    <!-- Performance: DNS-Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link rel="stylesheet" href="../css/styles.css">
+    
+    <style>
+        /* Critical above-the-fold CSS */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Roboto', sans-serif;
+            color: #ffffff;
+            background: #0a0a0a;
+        }
+        .navbar { background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#catalog-main">Перейти до основного контенту</a>
+    
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Головна навігація">
+        <div class="container">
+            <div class="logo" onclick="location.href='../index.html'" role="button" tabindex="0" aria-label="Логотип EstatyQ">
+                <img src="../обрезаный_логотип-removebg-preview.png" alt="ESTATYQ" class="logo-icon-image" loading="eager" decoding="async"/>
+                <div class="logo-text">
+                    <h1>ESTATYQ</h1>
+                    <p class="logo-tagline">МРІЯ СТАЄ РЕАЛЬНІСТЮ</p>
+                </div>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="catalog.html" class="active" aria-current="page">Каталог</a></li>
+                <li><a href="landing.html">Про нас</a></li>
+                <li><a href="content.html">Контент</a></li>
+                <li><a href="contact.html">Контакти</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main id="catalog-main" class="catalog container catalog-full" role="main" aria-label="Каталог нерухомості">
+        <header class="catalog-header">
+            <h1>Каталог оголошень</h1>
+            <p>Фільтруйте, сортуйте та діліться посиланням з вибраними параметрами</p>
+        </header>
+
+        <!-- Filters Section -->
+        <section class="advanced-filters-panel" aria-label="Фільтри каталогу">
+            <div class="filters-header">
+                <h2>Фільтри</h2>
+                <div class="filters-controls">
+                    <button id="reset-filters" class="btn btn-secondary" type="button" aria-label="Скинути фільтри">Скинути</button>
+                    <button id="apply-filters" class="btn btn-primary" type="button" aria-label="Застосувати фільтри">Показати</button>
+                </div>
+            </div>
+
+            <div class="filters-grid" id="filters-grid" role="region" aria-label="Опції фільтрації">
+                <div class="filter-group">
+                    <label for="f-city">Місто</label>
+                    <select id="f-city" class="filter-select" aria-label="Виберіть місто">
+                        <option value="">Будь-яке</option>
+                        <option value="kyiv">Київ</option>
+                        <option value="kharkiv">Харків</option>
+                        <option value="odesa">Одеса</option>
+                        <option value="lviv">Львів</option>
+                        <option value="dnipro">Дніпро</option>
+                        <option value="zaporizhzhia">Запоріжжя</option>
+                        <option value="ivano_frankivsk">Івано-Франківськ</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="f-type">Тип угоди</label>
+                    <select id="f-type" class="filter-select" aria-label="Виберіть тип угоди">
+                        <option value="">Будь-який</option>
+                        <option value="sale">Продаж</option>
+                        <option value="rent">Оренда</option>
+                        <option value="daily">Подобово</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="f-propertyType">Тип нерухомості</label>
+                    <select id="f-propertyType" class="filter-select" aria-label="Виберіть тип нерухомості">
+                        <option value="">Будь-який</option>
+                        <option value="flat">Квартира</option>
+                        <option value="house">Будинок</option>
+                        <option value="land">Земля</option>
+                        <option value="office">Офіс</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Ціна, USD</label>
+                    <div class="range-inputs">
+                        <input id="f-priceMin" class="range-input" type="number" inputmode="numeric" placeholder="мін" aria-label="Мінімальна ціна">
+                        <span class="range-separator" aria-hidden="true">—</span>
+                        <input id="f-priceMax" class="range-input" type="number" inputmode="numeric" placeholder="макс" aria-label="Максимальна ціна">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>Площа, м²</label>
+                    <div class="range-inputs">
+                        <input id="f-areaMin" class="range-input" type="number" inputmode="numeric" placeholder="мін" aria-label="Мінимальна площа">
+                        <span class="range-separator" aria-hidden="true">—</span>
+                        <input id="f-areaMax" class="range-input" type="number" inputmode="numeric" placeholder="макс" aria-label="Максимальна площа">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label for="f-rooms">Кімнат</label>
+                    <select id="f-rooms" class="filter-select" aria-label="Виберіть кількість кімнат">
+                        <option value="">Будь-яка</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="f-q">Пошук</label>
+                    <input id="f-q" class="search-input" type="text" placeholder="Адреса, район..." aria-label="Пошук по каталогу">
+                </div>
+            </div>
+
+            <div class="active-filters" id="active-filters" aria-live="polite" aria-atomic="true" style="display:none">
+                <span class="active-filters-label">Активні фільтри</span>
+                <div class="active-filters-chips" id="active-filters-chips"></div>
+            </div>
+        </section>
+
+        <!-- Controls Section -->
+        <section class="properties-controls" aria-label="Сортування та відображення">
+            <div class="sorting-controls">
+                <label for="f-sort">Сортування</label>
+                <select id="f-sort" class="sort-select" aria-label="Виберіть порядок сортування">
+                    <option value="date_desc">Спочатку нові</option>
+                    <option value="price_asc">Ціна ↑</option>
+                    <option value="price_desc">Ціна ↓</option>
+                    <option value="area_desc">Площа ↓</option>
+                </select>
+            </div>
+            <div class="view-controls">
+                <span id="found-counter" class="sort-label" role="status" aria-live="polite">—</span>
+                <select id="f-perPage" class="sort-select" aria-label="Кількість елементів на сторінці">
+                    <option value="12">12</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Properties Grid -->
+        <div id="grid" class="properties-grid" role="region" aria-live="polite" aria-busy="true" aria-label="Список нерухомості"></div>
+
+        <!-- Error Message -->
+        <div id="error" class="error-message" role="alert" aria-live="assertive" style="display:none;"></div>
+
+        <!-- Pagination -->
+        <nav id="pagination" aria-label="Пагінація" style="display:none;">
+            <button id="prev-page" class="pagination-btn" type="button" aria-label="Попередня сторінка">Назад</button>
+            <span id="page-info" class="sort-label" aria-live="polite"></span>
+            <button id="next-page" class="pagination-btn" type="button" aria-label="Наступна сторінка">Далі</button>
+        </nav>
+    </main>
+
+    <!-- JSON-LD Schema for CollectionPage with ItemList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Каталог нерухомості EstatyQ",
+        "description": "Каталог нерухомості з можливістю фільтрації та пошуку",
+        "url": "https://estatyq.ua/pages/catalog.html",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "EstatyQ",
+            "url": "https://estatyq.ua"
+        },
+        "hasPart": {
+            "@type": "ItemList",
+            "name": "Пропозиції нерухомості",
+            "itemListElement": []
+        }
+    }
+    </script>
+
+    <script src="../js/url-state.js"></script>
+    <script src="../js/catalog.js"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оголошення — EstatyQ</title>
+    <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../css/styles.css">
+    <meta name="description" content="Деталі оголошення EstatyQ">
+</head>
+<body>
+    <a class="skip-link" href="#listing-main">Перейти до основного контенту</a>
+    <nav class="navbar" role="navigation" aria-label="Головна навігація">
+        <div class="container">
+            <a href="catalog.html" class="logo" aria-label="Логотип EstatyQ - На головну">
+                <img src="../обрезаный_логотип-removebg-preview.png" alt="ESTATYQ" class="logo-icon-image"/>
+                <div class="logo-text">
+                    <h1>ESTATYQ</h1>
+                    <p class="logo-tagline">МРІЯ СТАЄ РЕАЛЬНІСТЮ</p>
+                </div>
+            </a>
+            <ul class="nav-links" role="list">
+                <li><a href="catalog.html" class="active">Каталог</a></li>
+                <li><a href="landing.html">Про нас</a></li>
+                <li><a href="content.html">Контент</a></li>
+                <li><a href="contact.html">Контакти</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main id="listing-main" class="catalog container" role="main">
+        <div id="error" class="error-message" role="alert" aria-live="assertive"></div>
+        <article id="card" class="property-card" aria-busy="true" style="max-width: 960px; margin: 20px auto;">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-content">
+                <div class="skeleton-line" style="height:24px;width:60%"></div>
+                <div class="skeleton-line" style="width:40%"></div>
+                <div class="skeleton-details">
+                    <div class="skeleton-detail-item"></div>
+                    <div class="skeleton-detail-item"></div>
+                    <div class="skeleton-detail-item"></div>
+                </div>
+                <div class="skeleton-line skeleton-price"></div>
+            </div>
+        </article>
+    </main>
+
+    <script>
+    (function() {
+      const params = new URLSearchParams(location.search);
+      const id = params.get('id');
+      const card = document.getElementById('card');
+      const err = document.getElementById('error');
+      if (!id) {
+        err.textContent = 'Не передано ідентифікатор оголошення';
+        err.classList.add('show');
+        card.setAttribute('aria-busy', 'false');
+        return;
+      }
+      fetch(`/api/v2/listings?id=${encodeURIComponent(id)}&perPage=1`)
+        .then(r => r.json())
+        .then(data => {
+          const item = data && Array.isArray(data.items) ? data.items[0] : null;
+          if (!item) {
+            err.textContent = 'Оголошення не знайдено';
+            err.classList.add('show');
+            card.setAttribute('aria-busy', 'false');
+            return;
+          }
+          const img = (item.photos && item.photos[0]) || 'https://via.placeholder.com/960x540?text=No+Photo';
+          card.innerHTML = `
+            <div class="property-image" style="height:360px">
+              <img src="${img}" loading="lazy" alt="${item.title}" style="width:100%;height:100%;object-fit:cover" />
+              <div class="property-badge">${item.type === 'sale' ? 'Продаж' : (item.type === 'rent' ? 'Оренда' : 'Подобово')}</div>
+            </div>
+            <div class="property-content">
+              <h1 class="property-title" style="font-size:1.6rem">${item.title}</h1>
+              <p class="property-location">${item.address || ''}${item.city ? (item.address ? ', ' : '') + item.city : ''}</p>
+              <div class="property-details">
+                ${item.rooms ? `<div class="detail-item"><div class="detail-item-value">${item.rooms}</div><div class="detail-item-label">Кімнат</div></div>` : ''}
+                ${item.areaTotal ? `<div class="detail-item"><div class="detail-item-value">${Math.round(item.areaTotal)}</div><div class="detail-item-label">м²</div></div>` : ''}
+                ${item.floor ? `<div class="detail-item"><div class="detail-item-value">${item.floor}${item.floorsTotal? ' / ' + item.floorsTotal: ''}</div><div class="detail-item-label">Поверх</div></div>` : ''}
+              </div>
+              <div class="property-price">${item.currency === 'USD' ? '$' : ''}${Math.round(item.price)}${item.currency !== 'USD' ? ' ' + item.currency : ''}</div>
+              <div class="property-action">
+                <a class="btn-details" href="catalog.html">Назад до каталогу</a>
+              </div>
+            </div>
+          `;
+          card.setAttribute('aria-busy', 'false');
+
+          // JSON-LD Product/Offer
+          const ld = {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            'name': item.title,
+            'image': item.photos,
+            'description': `${item.address || ''} ${item.city || ''}`.trim(),
+            'offers': {
+              '@type': 'Offer',
+              'priceCurrency': item.currency || 'USD',
+              'price': item.price || 0,
+              'availability': 'https://schema.org/InStock'
+            }
+          };
+          const s = document.createElement('script');
+          s.type = 'application/ld+json';
+          s.textContent = JSON.stringify(ld);
+          document.head.appendChild(s);
+          document.title = `${item.title} — EstatyQ`;
+        })
+        .catch(() => {
+          err.textContent = 'Помилка завантаження оголошення';
+          err.classList.add('show');
+          card.setAttribute('aria-busy', 'false');
+        });
+    })();
+    </script>
+</body>
+</html>
+
+

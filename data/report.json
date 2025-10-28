@@ -1,0 +1,23 @@
+{
+  "apartment/rent": {
+    "count": 313
+  },
+  "apartment/sale": {
+    "count": 31
+  },
+  "house/rent": {
+    "count": 2
+  },
+  "house/sale": {
+    "count": 15
+  },
+  "office/rent": {
+    "count": 1
+  },
+  "commercial/rent": {
+    "count": 2
+  },
+  "commercial/sale": {
+    "count": 1
+  }
+}

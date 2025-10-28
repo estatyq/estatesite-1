@@ -12,9 +12,13 @@
     "db:seed": "node scripts/sync-xml-to-db.js",
     "build": "echo 'Static site - no build needed'",
     "deploy": "echo 'Deploy to production server'",
-    "test": "echo 'Running tests...'",
+    "test": "node tests/url-state.test.js",
     "lint": "echo 'Linting code...'",
-    "sync:xml": "node scripts/convert-xml-to-json.js \"$XML_URL\" data/mapping.json"
+    "sync:xml": "node scripts/convert-xml-to-json.js \"$XML_URL\" data/mapping.json",
+    "sync:yandex": "node scripts/parse-yandex-feed.js",
+    "discover:schema": "node scripts/discover-yandex-schema.js",
+    "perf:test": "node scripts/performance-test-pagination.js",
+    "perf:test-remote": "TEST_URL=https://your-domain.com node scripts/performance-test-pagination.js"
   },
   "keywords": [
     "real-estate",

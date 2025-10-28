@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const path = require('path');
+const fs = require('fs');
 
 // Initialize Express app
 const app = express();
@@ -132,6 +133,258 @@ app.get('/api/listings', async (req, res) => {
   } catch (error) {
     console.error('❌ Error fetching listings:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * ==================== V2 LISTINGS ENDPOINT (FILE-BASED, CONTRACT-COMPLIANT) ====================
+ * GET /api/v2/listings
+ * Query params: q, city, district, priceMin, priceMax, rooms, areaMin, areaMax,
+ *               type (sale|rent|daily), propertyType (flat|house|land|office), labels,
+ *               sort (price_asc|price_desc|date_desc|area_desc), page (>=1), perPage (<=50)
+ * Response: { items: Listing[], total: number, page: number, perPage: number }
+ */
+let __v2Cache = {
+  data: null,
+  ts: 0
+};
+const V2_CACHE_TTL_MS = 60 * 1000;
+
+function normalizePropertyType(t) {
+  if (!t) return null;
+  const map = { apartment: 'flat', house: 'house', land: 'land', office: 'office' };
+  return map[t] || (t === 'commercial' || t === 'warehouse' ? 'office' : t);
+}
+
+function normalizeListing(item) {
+  return {
+    id: item.id,
+    title: item.location?.address || `${item.type || 'Listing'} ${item.id}`,
+    price: item.price?.value ?? 0,
+    currency: item.price?.currency || 'USD',
+    address: item.location?.address || '',
+    city: item.location?.cityKey || item.location?.city || '',
+    district: item.location?.district || '',
+    lat: item.location?.geo?.lat ?? null,
+    lng: item.location?.geo?.lng ?? null,
+    areaTotal: item.area?.total ?? null,
+    rooms: item.rooms ?? null,
+    floor: item.floor?.current ?? null,
+    floorsTotal: item.floor?.total ?? null,
+    type: item.transactionType || 'sale',
+    propertyType: normalizePropertyType(item.type) || 'flat',
+    photos: Array.isArray(item.images) ? item.images : [],
+    publishedAt: item.createdAt || null,
+    updatedAt: item.updatedAt || null,
+    labels: []
+  };
+}
+
+function getV2Data() {
+  const now = Date.now();
+  if (__v2Cache.data && (now - __v2Cache.ts) < V2_CACHE_TTL_MS) {
+    return __v2Cache.data;
+  }
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, 'data', 'listings.example.json'), 'utf8');
+    const arr = JSON.parse(raw);
+    const normalized = Array.isArray(arr) ? arr.map(normalizeListing) : [];
+    __v2Cache = { data: normalized, ts: now };
+    return normalized;
+  } catch (e) {
+    __v2Cache = { data: [], ts: now };
+    return [];
+  }
+}
+
+function applyV2Filters(items, q) {
+  let result = items;
+  const {
+    id,
+    q: search,
+    city,
+    district,
+    priceMin,
+    priceMax,
+    rooms,
+    areaMin,
+    areaMax,
+    type,
+    propertyType
+  } = q;
+
+  if (id) {
+    result = result.filter(it => String(it.id) === String(id));
+  }
+  if (search) {
+    const s = String(search).toLowerCase();
+    result = result.filter(it => (
+      `${it.title} ${it.address} ${it.city} ${it.district}`.toLowerCase().includes(s)
+    ));
+  }
+  if (city) {
+    result = result.filter(it => String(it.city) === String(city));
+  }
+  if (district) {
+    result = result.filter(it => (it.district || '') === String(district));
+  }
+  if (priceMin) {
+    const v = Number(priceMin);
+    if (!Number.isNaN(v)) result = result.filter(it => (it.price ?? 0) >= v);
+  }
+  if (priceMax) {
+    const v = Number(priceMax);
+    if (!Number.isNaN(v)) result = result.filter(it => (it.price ?? 0) <= v);
+  }
+  if (rooms) {
+    const v = Number(rooms);
+    if (!Number.isNaN(v)) result = result.filter(it => (it.rooms ?? -1) === v);
+  }
+  if (areaMin) {
+    const v = Number(areaMin);
+    if (!Number.isNaN(v)) result = result.filter(it => (it.areaTotal ?? 0) >= v);
+  }
+  if (areaMax) {
+    const v = Number(areaMax);
+    if (!Number.isNaN(v)) result = result.filter(it => (it.areaTotal ?? 0) <= v);
+  }
+  if (type) {
+    const allowed = ['sale', 'rent', 'daily'];
+    if (allowed.includes(String(type))) {
+      result = result.filter(it => it.type === String(type));
+    }
+  }
+  if (propertyType) {
+    result = result.filter(it => it.propertyType === String(propertyType));
+  }
+
+  return result;
+}
+
+function applyV2Sort(items, sort) {
+  const allowed = ['price_asc', 'price_desc', 'date_desc', 'area_desc'];
+  if (!sort) return items;
+  if (!allowed.includes(sort)) return null; // invalid
+  const arr = [...items];
+  switch (sort) {
+    case 'price_asc':
+      arr.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+      break;
+    case 'price_desc':
+      arr.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+      break;
+    case 'date_desc':
+      arr.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+      break;
+    case 'area_desc':
+      arr.sort((a, b) => (b.areaTotal ?? 0) - (a.areaTotal ?? 0));
+      break;
+  }
+  return arr;
+}
+
+/**
+ * Input validation and normalization middleware for /api/v2/listings
+ * Ensures parameters are safe and within acceptable ranges
+ */
+function validateV2ListingsParams(req, res, next) {
+  try {
+    // Normalize perPage parameter
+    const perPageRaw = req.query.perPage ?? '20';
+    const perPageInt = parseInt(perPageRaw, 10) || 20;
+    req.query.perPage = Math.max(1, Math.min(50, perPageInt));
+
+    // Normalize page parameter  
+    const pageInt = parseInt(req.query.page, 10) || 1;
+    req.query.page = Math.max(1, pageInt);
+
+    // Validate sort parameter - whitelist only
+    const allowedSorts = ['price_asc', 'price_desc', 'date_desc', 'area_desc'];
+    if (req.query.sort && !allowedSorts.includes(req.query.sort)) {
+      req.query.sort = 'date_desc'; // fallback to default
+    }
+
+    // Normalize numeric parameters
+    if (req.query.priceMin) {
+      const v = parseFloat(req.query.priceMin);
+      req.query.priceMin = Number.isNaN(v) ? undefined : v;
+    }
+    if (req.query.priceMax) {
+      const v = parseFloat(req.query.priceMax);
+      req.query.priceMax = Number.isNaN(v) ? undefined : v;
+    }
+    if (req.query.areaMin) {
+      const v = parseFloat(req.query.areaMin);
+      req.query.areaMin = Number.isNaN(v) ? undefined : v;
+    }
+    if (req.query.areaMax) {
+      const v = parseFloat(req.query.areaMax);
+      req.query.areaMax = Number.isNaN(v) ? undefined : v;
+    }
+    if (req.query.rooms) {
+      const v = parseInt(req.query.rooms, 10);
+      req.query.rooms = Number.isNaN(v) ? undefined : v;
+    }
+
+    // Validate type parameter - whitelist
+    const allowedTypes = ['sale', 'rent', 'daily'];
+    if (req.query.type && !allowedTypes.includes(req.query.type)) {
+      req.query.type = undefined;
+    }
+
+    // Validate propertyType parameter - whitelist
+    const allowedPropertyTypes = ['flat', 'house', 'land', 'office'];
+    if (req.query.propertyType && !allowedPropertyTypes.includes(req.query.propertyType)) {
+      req.query.propertyType = undefined;
+    }
+
+    next();
+  } catch (e) {
+    res.status(400).json({ error: { code: 'INVALID_PARAMS', message: 'Invalid parameters' } });
+  }
+}
+
+app.get('/api/v2/listings', validateV2ListingsParams, (req, res) => {
+  try {
+    const perPage = req.query.perPage;
+    const page = req.query.page;
+    const sort = req.query.sort || 'date_desc';
+
+    let items = getV2Data();
+    items = applyV2Filters(items, req.query);
+
+    const sorted = applyV2Sort(items, sort);
+    if (sorted === null) {
+      return res.status(400).json({ 
+        error: { code: 'INVALID_SORT', message: 'Unsupported sort parameter' } 
+      });
+    }
+
+    const total = (sorted || items).length;
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+    const paged = (sorted || items).slice(start, end);
+
+    // Set cache headers for catalog responses
+    res.set({
+      'Cache-Control': 'public, max-age=60',
+      'X-Total-Count': String(total),
+      'X-Page-Size': String(perPage),
+      'X-Page-Number': String(page)
+    });
+
+    return res.json({ 
+      items: paged,
+      total,
+      page,
+      perPage,
+      hasMore: (page * perPage) < total
+    });
+  } catch (e) {
+    console.error('Error in /api/v2/listings:', e);
+    return res.status(500).json({ 
+      error: { code: 'INTERNAL', message: 'Unexpected error' } 
+    });
   }
 });
 

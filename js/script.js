@@ -509,11 +509,130 @@ function generateProperties() {
 let allProperties = [];
 let filteredProperties = [];
 
+// Глобальні змінні для модального вікна фотографій
+let currentPropertyImages = [];
+let currentImageIndex = 0;
+let lastFocusedElement = null;
+
+// ==================== FORMATTERS & HELPERS ====================
+const PLACEHOLDER = '—';
+
+function formatNumber(value, options) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return PLACEHOLDER;
+  return num.toLocaleString('uk-UA', options);
+}
+
+function currencySymbol(cur) {
+  const c = (cur || '').toUpperCase();
+  if (c === 'UAH' || c === '₴') return '₴';
+  if (c === 'EUR' || c === '€') return '€';
+  return '$';
+}
+
+function formatPrice(value, currency, isRent) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return PLACEHOLDER;
+  const symbol = currencySymbol(currency);
+  const formatted = formatNumber(Math.round(num));
+  return isRent ? `${symbol}${formatted} /міс` : `${symbol}${formatted}`;
+}
+
+function formatInt(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return PLACEHOLDER;
+  return formatNumber(Math.round(num));
+}
+
+function safeText(text) {
+  if (text === undefined || text === null || text === '') return PLACEHOLDER;
+  return String(text);
+}
+
+function primaryImage(prop) {
+  if (Array.isArray(prop.images) && prop.images.length) return prop.images[0];
+  return prop.image || 'https://via.placeholder.com/800x600?text=No+Image';
+}
+
+function showSkeletons(count = 12) {
+  const grid = document.getElementById('properties-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const sk = document.createElement('div');
+    sk.className = 'skeleton-card';
+    sk.innerHTML = `
+      <div class="skeleton-image"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-title skeleton-text"></div>
+        <div class="skeleton-location skeleton-text"></div>
+        <div class="skeleton-details">
+          <div class="skeleton-detail-item"></div>
+          <div class="skeleton-detail-item"></div>
+          <div class="skeleton-detail-item"></div>
+        </div>
+        <div class="skeleton-price skeleton-text"></div>
+        <div class="skeleton-buttons">
+          <div class="skeleton-button"></div>
+          <div class="skeleton-button"></div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(sk);
+  }
+}
+
+async function loadProperties() {
+  try {
+    const res = await fetch('data/listings.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('Failed to load listings.json');
+    const data = await res.json();
+    
+    // Нормализуем данные - преобразуем вложенные структуры в плоские
+    allProperties = (Array.isArray(data) ? data : []).map(item => ({
+      id: item.id || `listing-${Math.random()}`,
+      title: item.title || `Об'єкт ${item.id}`,
+      description: item.description || '',
+      location: item.location || item.locationString || item.location?.address || 'Київ',
+      // 🔴 ИСПРАВЛЕНИЕ: Извлекаем цену правильно из объекта price
+      price: (item.price && typeof item.price === 'object' && item.price.value) 
+        ? Number(item.price.value) 
+        : (typeof item.price === 'number' ? item.price : 0),
+      currency: (item.price && item.price.currency) || item.currency || 'UAH',
+      // 🔴 ИСПРАВЛЕНИЕ: Извлекаем площадь правильно из объекта area
+      area: (item.area && typeof item.area === 'object' && item.area.total)
+        ? Number(item.area.total)
+        : (typeof item.area === 'number' ? item.area : null),
+      rooms: item.rooms ? Number(item.rooms) : null,
+      floor: item.floor ? (typeof item.floor === 'object' ? item.floor.current : item.floor) : null,
+      floorsTotal: item.floorsTotal || (item.floor && typeof item.floor === 'object' ? item.floor.total : null),
+      type: (item.type || 'apartment').toLowerCase(),
+      transactionType: (item.transactionType || item.rawType === 'аренда' ? 'rent' : 'sale').toLowerCase(),
+      images: item.images || [],
+      image: (item.images && item.images[0]) || item.image || 'https://via.placeholder.com/400x300?text=No+Image',
+      city: item.city || item.location?.cityKey || item.raw?.city || 'kyiv',
+      year: item.yearBuilt ? Number(item.yearBuilt) : new Date().getFullYear(),
+      building: item.yearBuilt ? Number(item.yearBuilt) : new Date().getFullYear(),
+      locationString: item.locationString || item.location || '',
+      amenities: item.amenities || {},
+      daily: item.transactionType === 'daily' || false
+    }));
+    
+    filteredProperties = [...allProperties];
+    console.log(`✅ Загружено ${allProperties.length} объектів з listings.json`);
+    applyFilters();
+    renderProperties();
+  } catch (e) {
+    console.error('❌ loadProperties error', e);
+  }
+}
+
 let filters = {
   region: null,
   city: null,
   districts: [],
   microdistricts: [],
+  metroStations: [],
   metro: null, // Станція метро
   transaction: null,
   type: null,
@@ -570,7 +689,8 @@ async function loadPropertiesFromAPI() {
       // Преобразуем данные из API в формат приложения
       allProperties = result.data.map(item => ({
         id: item.id || `listing-${Math.random()}`,
-        title: item.location_address || `Об'єкт ${item.id}`,
+        // Строим title из доступных данных: тип + адреса + район
+        title: item.title || `${propertyTypes[item.type] || 'Нерухомість'} на ${item.location_district || item.location_address || item.location_city || 'невідомій адресі'}`,
         description: item.description || '',
         // Если адрес пусто, используем город по умолчанию
         location: item.location_address || item.location_district || 'Київ',
@@ -1210,11 +1330,19 @@ function removeFilter(filterKey) {
       break;
     case 'type':
       filters.type = null;
-      document.querySelectorAll('.quick-filter-btn').forEach(btn => btn.classList.remove('active'));
+      // BUG-7 FIX: Also update aria-pressed when removing filter
+      document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
       break;
     case 'rooms':
       filters.rooms = null;
-      document.querySelectorAll('.room-btn').forEach(btn => btn.classList.remove('active'));
+      // BUG-7 FIX: Also update aria-pressed when removing filter
+      document.querySelectorAll('.room-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
       break;
     case 'price':
       filters.priceMin = null;
@@ -1271,10 +1399,7 @@ function renderProperties() {
   }
   
   toShow.forEach(prop => {
-    const card = document.createElement("div");
-    card.className = "property-card";
-    
-    // Генеруємо теги особливостей
+    const isFav = isFavorite(prop.id);
     const features = [];
     if (prop.building >= 2020) features.push('Новобудова');
     if (prop.metro) features.push('Метро');
@@ -1283,41 +1408,79 @@ function renderProperties() {
     if (prop.daily) features.push('Подобово');
     
     const featuresHtml = features.map(feature => `<span class="feature-tag">${feature}</span>`).join('');
-    
-    // Визначаємо статус
     const status = prop.daily ? 'Подобово' : (prop.transactionType === 'sale' ? 'Продаж' : 'Оренда');
     
-    // Перевіряємо чи улюблений
-    const isFav = isFavorite(prop.id);
-    
-    card.innerHTML = `
-      <div class="property-image">
-        <img src="${prop.image}" alt="${prop.title}" style="width: 100%; height: 100%; object-fit: cover;">
-        <div class="property-badge">${status}</div>
-        <div class="property-status">${prop.building} р.</div>
-      </div>
-      <div class="property-content">
-        <h3 class="property-title">${prop.title}</h3>
-        <p class="property-location">${prop.location}, ${cities[prop.city].name}</p>
-        
-        <div class="property-details">
-          ${prop.rooms > 0 ? `<div class="detail-item"><div class="detail-item-value">${prop.rooms}</div><div class="detail-item-label">Кімнат</div></div>` : ""}
-          <div class="detail-item"><div class="detail-item-value">${Math.round(prop.area)}</div><div class="detail-item-label">м²</div></div>
-          ${prop.floor ? `<div class="detail-item"><div class="detail-item-value">${prop.floor}</div><div class="detail-item-label">Поверх</div></div>` : ""}
-          ${prop.plotArea ? `<div class="detail-item"><div class="detail-item-value">${prop.plotArea}</div><div class="detail-item-label">Сот</div></div>` : ""}
+    if (currentView === 'list') {
+      // Рендеринг для списку
+      const item = document.createElement("div");
+      item.className = "property-list-item";
+      item.innerHTML = `
+        <div class="property-list-image">
+          <img src="${primaryImage(prop)}" alt="${safeText(prop.title)}" loading="lazy" decoding="async" onerror="this.dataset.error='true'">
+          <div class="property-badge">${status}</div>
         </div>
-
-        <div class="property-price">$${Math.round(prop.price)} ${prop.transactionType === "rent" ? "тис./міс" : "тис."}</div>
-        
-        ${featuresHtml ? `<div class="property-features">${featuresHtml}</div>` : ''}
-
-        <div class="property-action">
-          <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
-          <button class="btn-like ${isFav ? 'liked' : ''}" onclick="toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
+        <div class="property-list-content">
+          <div class="property-list-header">
+            <div>
+              <h3 class="property-list-title">${safeText(prop.title)}</h3>
+              <p class="property-list-location">📍 ${safeText(prop.location)}, ${cities[prop.city] ? cities[prop.city].name : PLACEHOLDER}</p>
+            </div>
+            <div class="property-list-price">${formatPrice(prop.price, prop.currency, prop.transactionType === 'rent')}</div>
+          </div>
+          
+          <div class="property-list-details">
+            ${Number(prop.rooms) > 0 ? `<div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.rooms)}</div><div class="property-list-detail-label">Кімнат</div></div>` : ""}
+            <div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.area)}</div><div class="property-list-detail-label">м²</div></div>
+            ${Number.isFinite(Number(prop.floor)) ? `<div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.floor)}</div><div class="property-list-detail-label">Поверх</div></div>` : ""}
+            ${Number.isFinite(Number(prop.plotArea)) ? `<div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.plotArea)}</div><div class="property-list-detail-label">Сот</div></div>` : ""}
+          </div>
+          
+          ${featuresHtml ? `<div class="property-features">${featuresHtml}</div>` : ''}
+          
+          <div class="property-list-footer">
+            <div class="property-list-actions">
+              <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
+              <button class="btn-like ${isFav ? 'liked' : ''}" onclick="toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
+            </div>
+          </div>
         </div>
-      </div>
-    `;
-    grid.appendChild(card);
+      `;
+      item.addEventListener('click', () => openModal(prop.id));
+      grid.appendChild(item);
+    } else {
+      // Рендеринг для сітки
+      const card = document.createElement("div");
+      card.className = "property-card";
+      card.innerHTML = `
+        <div class="property-image">
+          <img src="${primaryImage(prop)}" alt="${safeText(prop.title)}" loading="lazy" decoding="async" onerror="this.dataset.error='true'" style="width: 100%; height: 100%; object-fit: cover;">
+          <div class="property-badge">${status}</div>
+          ${prop.building ? `<div class="property-status">${safeText(prop.building)} р.</div>` : ''}
+        </div>
+        <div class="property-content">
+          <h3 class="property-title">${safeText(prop.title)}</h3>
+          <p class="property-location">${safeText(prop.location)}, ${cities[prop.city] ? cities[prop.city].name : PLACEHOLDER}</p>
+          
+          <div class="property-details">
+            ${Number(prop.rooms) > 0 ? `<div class="detail-item"><div class="detail-item-value">${formatInt(prop.rooms)}</div><div class="detail-item-label">Кімнат</div></div>` : ""}
+            <div class="detail-item"><div class="detail-item-value">${formatInt(prop.area)}</div><div class="detail-item-label">м²</div></div>
+            ${Number.isFinite(Number(prop.floor)) ? `<div class="detail-item"><div class="detail-item-value">${formatInt(prop.floor)}</div><div class="detail-item-label">Поверх</div></div>` : ""}
+            ${Number.isFinite(Number(prop.plotArea)) ? `<div class="detail-item"><div class="detail-item-value">${formatInt(prop.plotArea)}</div><div class="detail-item-label">Сот</div></div>` : ""}
+          </div>
+
+          <div class="property-price">${formatPrice(prop.price, prop.currency, prop.transactionType === 'rent')}</div>
+          
+          ${featuresHtml ? `<div class="property-features">${featuresHtml}</div>` : ''}
+
+          <div class="property-action">
+            <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
+            <button class="btn-like ${isFav ? 'liked' : ''}" onclick="toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
+          </div>
+        </div>
+      `;
+      card.addEventListener('click', () => openModal(prop.id));
+      grid.appendChild(card);
+    }
   });
   
   // Показываем/скрываем кнопку "Показати ще"
@@ -1392,19 +1555,19 @@ function sortProperties() {
 
 function setView(view) {
   currentView = view;
+  localStorage.setItem('estatyq_view', view);
   
   // Оновлюємо кнопки
   document.querySelectorAll('.view-btn').forEach(btn => {
-    btn.classList.remove('active');
+    const isActive = btn.getAttribute('data-view') === view;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
   });
-  document.querySelector(`[data-view="${view}"]`).classList.add('active');
   
   // Змінюємо контейнер
   const grid = document.getElementById('properties-grid');
-  if (view === 'list') {
-    grid.className = 'properties-list';
-  } else {
-    grid.className = 'properties-grid';
+  if (grid) {
+    grid.className = (view === 'list') ? 'properties-list' : 'properties-grid';
   }
   
   renderProperties();
@@ -1448,23 +1611,23 @@ function renderProperties() {
       item.className = "property-list-item";
       item.innerHTML = `
         <div class="property-list-image">
-          <img src="${prop.image}" alt="${prop.title}">
+          <img src="${primaryImage(prop)}" alt="${safeText(prop.title)}" loading="lazy" decoding="async" onerror="this.dataset.error='true'">
           <div class="property-badge">${status}</div>
         </div>
         <div class="property-list-content">
           <div class="property-list-header">
             <div>
-              <h3 class="property-list-title">${prop.title}</h3>
-              <p class="property-list-location">📍 ${prop.location}, ${cities[prop.city].name}</p>
+              <h3 class="property-list-title">${safeText(prop.title)}</h3>
+              <p class="property-list-location">📍 ${safeText(prop.location)}, ${cities[prop.city] ? cities[prop.city].name : PLACEHOLDER}</p>
             </div>
-            <div class="property-list-price">$${Math.round(prop.price)} ${prop.transactionType === "rent" ? "тис./міс" : "тис."}</div>
+            <div class="property-list-price">${formatPrice(prop.price, prop.currency, prop.transactionType === 'rent')}</div>
           </div>
           
           <div class="property-list-details">
-            ${prop.rooms > 0 ? `<div class="property-list-detail"><div class="property-list-detail-value">${prop.rooms}</div><div class="property-list-detail-label">Кімнат</div></div>` : ""}
-            <div class="property-list-detail"><div class="property-list-detail-value">${Math.round(prop.area)}</div><div class="property-list-detail-label">м²</div></div>
-            ${prop.floor ? `<div class="property-list-detail"><div class="property-list-detail-value">${prop.floor}</div><div class="property-list-detail-label">Поверх</div></div>` : ""}
-            ${prop.plotArea ? `<div class="property-list-detail"><div class="property-list-detail-value">${prop.plotArea}</div><div class="property-list-detail-label">Сот</div></div>` : ""}
+            ${Number(prop.rooms) > 0 ? `<div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.rooms)}</div><div class="property-list-detail-label">Кімнат</div></div>` : ""}
+            <div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.area)}</div><div class="property-list-detail-label">м²</div></div>
+            ${Number.isFinite(Number(prop.floor)) ? `<div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.floor)}</div><div class="property-list-detail-label">Поверх</div></div>` : ""}
+            ${Number.isFinite(Number(prop.plotArea)) ? `<div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.plotArea)}</div><div class="property-list-detail-label">Сот</div></div>` : ""}
           </div>
           
           ${featuresHtml ? `<div class="property-features">${featuresHtml}</div>` : ''}
@@ -1477,29 +1640,30 @@ function renderProperties() {
           </div>
         </div>
       `;
+      item.addEventListener('click', () => openModal(prop.id));
       grid.appendChild(item);
     } else {
-      // Рендеринг для сітки (існуючий код)
+      // Рендеринг для сітки
       const card = document.createElement("div");
       card.className = "property-card";
       card.innerHTML = `
         <div class="property-image">
-          <img src="${prop.image}" alt="${prop.title}" style="width: 100%; height: 100%; object-fit: cover;">
+          <img src="${primaryImage(prop)}" alt="${safeText(prop.title)}" loading="lazy" decoding="async" onerror="this.dataset.error='true'" style="width: 100%; height: 100%; object-fit: cover;">
           <div class="property-badge">${status}</div>
-          <div class="property-status">${prop.building} р.</div>
+          ${prop.building ? `<div class="property-status">${safeText(prop.building)} р.</div>` : ''}
         </div>
         <div class="property-content">
-          <h3 class="property-title">${prop.title}</h3>
-          <p class="property-location">${prop.location}, ${cities[prop.city].name}</p>
+          <h3 class="property-title">${safeText(prop.title)}</h3>
+          <p class="property-location">${safeText(prop.location)}, ${cities[prop.city] ? cities[prop.city].name : PLACEHOLDER}</p>
           
           <div class="property-details">
-            ${prop.rooms > 0 ? `<div class="detail-item"><div class="detail-item-value">${prop.rooms}</div><div class="detail-item-label">Кімнат</div></div>` : ""}
-            <div class="detail-item"><div class="detail-item-value">${Math.round(prop.area)}</div><div class="detail-item-label">м²</div></div>
-            ${prop.floor ? `<div class="detail-item"><div class="detail-item-value">${prop.floor}</div><div class="detail-item-label">Поверх</div></div>` : ""}
-            ${prop.plotArea ? `<div class="detail-item"><div class="detail-item-value">${prop.plotArea}</div><div class="detail-item-label">Сот</div></div>` : ""}
+            ${Number(prop.rooms) > 0 ? `<div class="detail-item"><div class="detail-item-value">${formatInt(prop.rooms)}</div><div class="detail-item-label">Кімнат</div></div>` : ""}
+            <div class="detail-item"><div class="detail-item-value">${formatInt(prop.area)}</div><div class="detail-item-label">м²</div></div>
+            ${Number.isFinite(Number(prop.floor)) ? `<div class="detail-item"><div class="detail-item-value">${formatInt(prop.floor)}</div><div class="detail-item-label">Поверх</div></div>` : ""}
+            ${Number.isFinite(Number(prop.plotArea)) ? `<div class="detail-item"><div class="detail-item-value">${formatInt(prop.plotArea)}</div><div class="detail-item-label">Сот</div></div>` : ""}
           </div>
 
-          <div class="property-price">$${Math.round(prop.price)} ${prop.transactionType === "rent" ? "тис./міс" : "тис."}</div>
+          <div class="property-price">${formatPrice(prop.price, prop.currency, prop.transactionType === 'rent')}</div>
           
           ${featuresHtml ? `<div class="property-features">${featuresHtml}</div>` : ''}
 
@@ -1509,6 +1673,7 @@ function renderProperties() {
           </div>
         </div>
       `;
+      card.addEventListener('click', () => openModal(prop.id));
       grid.appendChild(card);
     }
   });
@@ -1525,24 +1690,11 @@ function renderProperties() {
 }
 
 function loadMoreProperties() {
-  const oldCount = lastRenderedCount;
   displayedCount += INCREMENT;
+  renderProperties();
   
-  // Рендеримо тільки нові карточки (без повного перерендера)
-  renderProperties(false);
-  
-  // Плавна прокрутка тільки якщо додалися нові елементи
-  if (lastRenderedCount > oldCount) {
-    // Використовуємо requestAnimationFrame для кращої продуктивності
-    requestAnimationFrame(() => {
-      const grid = document.getElementById("properties-grid");
-      const cards = grid.children;
-      // Прокручуємо до першого нового елемента
-      if (cards[oldCount]) {
-        cards[oldCount].scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }
-    });
-  }
+  // Синхронізувати displayedCount в URL (BUG-2 FIX)
+  // updateURLState(); // TODO: URLState не визначений
 }
 
 // ==================== МОДАЛЬНОЕ ОКНО ====================
@@ -1553,6 +1705,15 @@ function openModal(propId) {
   
   const modal = document.getElementById("modal");
   const modalBody = document.getElementById("modal-body");
+  
+  // Зберігаємо фокусований елемент для повернення після закриття модалки
+  lastFocusedElement = document.activeElement;
+  
+  // Зберігаємо зображення для перелистування
+  currentPropertyImages = (Array.isArray(prop.images) && prop.images.length > 0) 
+    ? prop.images 
+    : (prop.image ? [prop.image] : ['https://via.placeholder.com/800x600?text=No+Image']);
+  currentImageIndex = 0;
   
   // Генеруємо особливості
   const features = [];
@@ -1567,6 +1728,52 @@ function openModal(propId) {
   if (prop.pets === 'дозволені') features.push('Домашні тварини');
   
   const featuresHtml = features.map(feature => `<span class="feature-tag">${feature}</span>`).join('');
+  
+  // Генеруємо HTML для галереї фото
+  const photoGalleryHtml = `
+    <div class="modal-photo-gallery">
+      <div class="modal-photo-container">
+        <img 
+          id="modal-main-image" 
+          src="${currentPropertyImages[0]}" 
+          alt="${safeText(prop.title)}"
+          style="width: 100%; height: 400px; object-fit: cover; border-radius: 8px;"
+          loading="lazy"
+          decoding="async"
+        />
+        ${currentPropertyImages.length > 1 ? `
+          <button 
+            class="modal-nav-btn modal-nav-prev" 
+            onclick="previousPropertyImage()"
+            aria-label="Попередня фотографія"
+            title="Попередня фото"
+          >❮</button>
+          <button 
+            class="modal-nav-btn modal-nav-next" 
+            onclick="nextPropertyImage()"
+            aria-label="Наступна фотографія"
+            title="Наступна фото"
+          >❯</button>
+        ` : ''}
+      </div>
+      ${currentPropertyImages.length > 1 ? `
+        <div class="modal-photo-counter">
+          <span id="photo-count">Фото <span id="current-photo">${currentImageIndex + 1}</span> з <span id="total-photos">${currentPropertyImages.length}</span></span>
+          <div class="modal-photo-thumbnails">
+            ${currentPropertyImages.map((img, idx) => `
+              <img 
+                src="${img}" 
+                alt="Фото ${idx + 1}"
+                class="modal-thumb ${idx === 0 ? 'active' : ''}"
+                onclick="goToPropertyImage(${idx})"
+                style="cursor: pointer; width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 2px solid ${idx === 0 ? '#d4af37' : 'transparent'}; margin: 0 5px;"
+              />
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
   
   modalBody.innerHTML = `
     <div class="modal-header">
@@ -1585,16 +1792,20 @@ function openModal(propId) {
     </div>
     
     <div class="modal-image">
-      <img src="${prop.image}" alt="${prop.title}" style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px;">
+      ${photoGalleryHtml}
     </div>
     
     <div class="modal-price-section">
-      <div class="modal-price">$${Math.round(prop.price)} ${prop.transactionType === "rent" ? "тис./міс" : "тис."}</div>
+      <div class="modal-price">${formatPrice(prop.price, prop.currency, prop.transactionType === 'rent')}</div>
       <div class="modal-price-details">
-        ${prop.transactionType === "rent" ? 
-          `<div>За місяць: $${Math.round(prop.price)} тис.</div>
-           <div>За день: $${Math.round(prop.price / 30)} тис.</div>` : 
-          `<div>За м²: $${Math.round(prop.price * 1000 / prop.area)}</div>`
+        ${prop.transactionType === 'rent'
+          ? `<div>За місяць: ${formatPrice(prop.price, prop.currency, false)}</div>
+             <div>За день: ${formatPrice(Number(prop.price) / 30, prop.currency, false)}</div>`
+          : (() => {
+              const perM2 = (Number(prop.price) && Number(prop.area)) ? (Number(prop.price) / Number(prop.area)) : null;
+              const sym = currencySymbol(prop.currency);
+              return `<div>За м²: ${perM2 ? sym + formatNumber(Math.round(perM2)) : PLACEHOLDER}</div>`;
+            })()
         }
       </div>
     </div>
@@ -1607,25 +1818,25 @@ function openModal(propId) {
       ${prop.rooms > 0 ? `
       <div class="modal-detail-item">
         <div class="modal-detail-label">Кімнат</div>
-        <div class="modal-detail-value">${prop.rooms}</div>
+        <div class="modal-detail-value">${formatInt(prop.rooms)}</div>
       </div>` : ''}
       <div class="modal-detail-item">
         <div class="modal-detail-label">Площа</div>
-        <div class="modal-detail-value">${Math.round(prop.area)} м²</div>
+        <div class="modal-detail-value">${formatInt(prop.area)} м²</div>
       </div>
       ${prop.floor ? `
       <div class="modal-detail-item">
         <div class="modal-detail-label">Поверх</div>
-        <div class="modal-detail-value">${prop.floor}</div>
+        <div class="modal-detail-value">${formatInt(prop.floor)}</div>
       </div>` : ''}
       <div class="modal-detail-item">
         <div class="modal-detail-label">Рік будівництва</div>
-        <div class="modal-detail-value">${prop.building}</div>
+        <div class="modal-detail-value">${safeText(prop.building)}</div>
       </div>
       ${prop.plotArea ? `
       <div class="modal-detail-item">
         <div class="modal-detail-label">Ділянка</div>
-        <div class="modal-detail-value">${prop.plotArea} соток</div>
+        <div class="modal-detail-value">${formatInt(prop.plotArea)} соток</div>
       </div>` : ''}
     </div>
     
@@ -1650,6 +1861,10 @@ function openModal(propId) {
 
 function closeModal() {
   document.getElementById("modal").style.display = "none";
+  // Повернути фокус на елемент, що мав його раніше
+  if (lastFocusedElement && lastFocusedElement.focus) {
+    lastFocusedElement.focus();
+  }
 }
 
 window.onclick = function(event) {
@@ -1658,6 +1873,16 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 }
+
+// Обробник Escape для закриття модалки
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' || event.keyCode === 27) {
+    const modal = document.getElementById("modal");
+    if (modal && modal.style.display === 'block') {
+      closeModal();
+    }
+  }
+});
 
 // ==================== TELEGRAM КНОПКА ====================
 
@@ -1675,7 +1900,7 @@ function updateTelegramButton() {
 
 // ==================== ДОПОМІЖНІ ФУНКЦІЇ ====================
 
-function toggleLike(event) {
+function toggleLikeIconLocal(event) {
   event.target.textContent = event.target.textContent === "♡" ? "♥" : "♡";
 }
 
@@ -1753,8 +1978,9 @@ function resetAllFilters() {
     city: null,
     districts: [],
     microdistricts: [],
+    metroStations: [],
     metro: null,
-    transaction: 'sale',
+    transaction: null,
     type: null,
     location: null,
     rooms: null,
@@ -1785,26 +2011,65 @@ function resetAllFilters() {
     favorites: []
   };
   
-  // Очищаємо всі поля форми
-  document.getElementById('global-search').value = '';
-  document.getElementById('region-select').value = '';
-  document.getElementById('city-select').value = '';
-  document.getElementById('district-select').value = '';
-  document.getElementById('price-min').value = '';
-  document.getElementById('price-max').value = '';
-  document.getElementById('area-min').value = '';
-  document.getElementById('area-max').value = '';
+  // Очищаємо всі поля форми (BUG-5 FIX - EXPANDED)
+  try {
+    document.getElementById('global-search').value = '';
+    document.getElementById('region-select').value = '';
+    document.getElementById('city-select').value = '';
+    document.getElementById('district-select').value = '';
+    document.getElementById('price-min').value = '';
+    document.getElementById('price-max').value = '';
+    document.getElementById('price-range').value = '500';  // Reset slider
+    document.getElementById('area-min').value = '';
+    document.getElementById('area-max').value = '';
+  } catch (e) {
+    console.warn('Some filter inputs not found:', e);
+  }
   
   // Скидаємо кнопки кімнат
-  document.querySelectorAll('.room-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.room-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.setAttribute('aria-pressed', 'false');
+  });
+  
+  // Скидаємо швидкі фільтри типу
+  document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.setAttribute('aria-pressed', 'false');
+  });
+  
+  // Скидаємо кнопки типу угоди
+  document.querySelectorAll('.nav-transaction-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.setAttribute('aria-pressed', 'false');
+  });
   
   // Скидаємо чекбокси
-  document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
+  
+  // Очистити всі вибрані чіпси
+  document.querySelectorAll('.district-chip.active').forEach(chip => {
+    chip.classList.remove('active');
+  });
+  
+  // Очистити таблицю фільтрів
+  const tableContainer = document.getElementById('filters-table-container');
+  if (tableContainer) {
+    const inputs = tableContainer.querySelectorAll('input, select');
+    inputs.forEach(input => input.value = '');
+  }
   
   // Очищаємо активні фільтри
-  document.getElementById('active-filters').style.display = 'none';
+  const activeFilters = document.getElementById('active-filters');
+  if (activeFilters) {
+    activeFilters.style.display = 'none';
+  }
   
   // Перерендеруємо все
+  selectedMetroLine = null;
+  displayedCount = 12;
   renderCityButtons();
   renderDistrictChips();
   renderMicrodistricts();
@@ -1968,8 +2233,11 @@ function isFavorite(propertyId) {
 document.addEventListener("DOMContentLoaded", function() {
   if (!document.getElementById("city-buttons")) return;
   
-  // Загружаем данные с API
-  loadPropertiesFromAPI().then(() => {
+  // Показуємо скелетони на час завантаження
+  showSkeletons(12);
+
+  // 🔴 ИСПРАВЛЕНИЕ: Загружаем и нормализуем данные из JSON файла
+  loadProperties().then(() => {
     // Устанавливаем транзакшн по умолчанию
     // filters.transaction = 'sale';  // Временно отключено чтобы видеть все данные
     filters.transaction = null;  // Показываем все типы транзакций
@@ -1979,8 +2247,9 @@ document.addEventListener("DOMContentLoaded", function() {
     renderDistrictChips();
     updateTableFilters();
     
-    // Встановлюємо вид за замовчуванням
-    setView('grid');
+    // Встановлюємо вид з localStorage або за замовчуванням
+    const savedView = localStorage.getItem('estatyq_view') || 'grid';
+    setView(savedView);
     
     // Добавляем слушатели для быстрых фильтров вверху
     setupQuickFilters();
@@ -1991,8 +2260,10 @@ document.addEventListener("DOMContentLoaded", function() {
     // Применяем фильтры для инициализации filteredProperties
     applyFilters();
     
-    // Рендеримо властивості
+    // Отображаем свойства
     renderProperties();
+  }).catch(err => {
+    console.error('❌ Ошибка при загрузке свойств:', err);
   });
 });
 // ==================== БЫСТРЫЕ ФИЛЬТРЫ ВВЕРХУ ====================
@@ -2003,11 +2274,15 @@ function setupQuickFilters() {
     btn.addEventListener('click', () => {
       const transaction = btn.getAttribute('data-transaction');
       
-      // Убираем active с других кнопок в этой группе
-      document.querySelectorAll('.nav-transaction-btn').forEach(b => b.classList.remove('active'));
+      // Убираем active с других кнопок в этой группе и обновляем aria-pressed (BUG-7 FIX)
+      document.querySelectorAll('.nav-transaction-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+      });
       
-      // Добавляем active к этой кнопке
+      // Добавляем active к этой кнопке и обновляем aria-pressed (BUG-7 FIX)
       btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
       
       // Применяем фильтр
       filters.transaction = transaction;
@@ -2029,9 +2304,12 @@ function setupQuickFilters() {
       const type = btn.getAttribute('data-type');
       selectType(type);
       
-      // Обновляем активный статус кнопки
-      document.querySelectorAll('.quick-filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      // Обновляем активный статус кнопки и aria-pressed (BUG-7 FIX)
+      document.querySelectorAll('.quick-filter-btn').forEach(b => {
+        const isActive = b.getAttribute('data-type') === filters.type;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
     });
   });
 }
@@ -2065,11 +2343,111 @@ function isFavorite(propertyId) {
   return favorites.includes(propertyId);
 }
 
-// ==================== URL STATE MANAGEMENT (TODO) ====================
+// ==================== URL STATE MANAGEMENT ====================
 
 function updateURLState() {
-  // TODO: Implement URL state management
-  // This will serialize filters to URL and use history.pushState
+  const state = {
+    q: filters.searchQuery || '',
+    city: filters.city || '',
+    type: filters.type || '',
+    transaction: filters.transaction || '',
+    priceMin: filters.priceMin || '',
+    priceMax: filters.priceMax || '',
+    areaMin: filters.areaMin || '',
+    areaMax: filters.areaMax || '',
+    rooms: filters.rooms || '',
+    displayedCount: String(displayedCount),
+    view: currentView
+  };
+  
+  const qs = URLState.stringify(state);
+  if (typeof history !== 'undefined' && typeof location !== 'undefined') {
+    history.replaceState(null, '', `${location.pathname}${qs ? '?' + qs : ''}`);
+  }
 }
+
+// Загрузити стан з URL при завантаженні сторінки
+function restoreURLState() {
+  const state = URLState.parse(location.search);
+  
+  if (state.q) filters.searchQuery = state.q;
+  if (state.city) filters.city = state.city;
+  if (state.type) filters.type = state.type;
+  if (state.transaction) filters.transaction = state.transaction;
+  if (state.priceMin) filters.priceMin = parseFloat(state.priceMin);
+  if (state.priceMax) filters.priceMax = parseFloat(state.priceMax);
+  if (state.areaMin) filters.areaMin = parseFloat(state.areaMin);
+  if (state.areaMax) filters.areaMax = parseFloat(state.areaMax);
+  if (state.rooms) filters.rooms = state.rooms;
+  if (state.displayedCount) displayedCount = parseInt(state.displayedCount, 10) || 12;
+  if (state.view) setView(state.view);
+  
+  // Оновити UI
+  if (filters.city) {
+    renderCityButtons();
+    renderDistrictChips();
+    renderMicrodistricts();
+    renderMetro();
+  }
+  
+  applyFilters();
+}
+
+// Функції для перелистування фото в модальному вікні
+function previousPropertyImage() {
+  if (currentPropertyImages.length === 0) return;
+  
+  currentImageIndex = (currentImageIndex - 1 + currentPropertyImages.length) % currentPropertyImages.length;
+  updateModalImage();
+}
+
+function nextPropertyImage() {
+  if (currentPropertyImages.length === 0) return;
+  
+  currentImageIndex = (currentImageIndex + 1) % currentPropertyImages.length;
+  updateModalImage();
+}
+
+function goToPropertyImage(index) {
+  if (index >= 0 && index < currentPropertyImages.length) {
+    currentImageIndex = index;
+    updateModalImage();
+  }
+}
+
+function updateModalImage() {
+  const mainImage = document.getElementById('modal-main-image');
+  if (mainImage) {
+    mainImage.src = currentPropertyImages[currentImageIndex];
+  }
+  
+  // Оновити лічильник
+  const currentPhotoSpan = document.getElementById('current-photo');
+  if (currentPhotoSpan) {
+    currentPhotoSpan.textContent = currentImageIndex + 1;
+  }
+  
+  // Оновити thumbnails активний клас
+  const thumbnails = document.querySelectorAll('.modal-thumb');
+  thumbnails.forEach((thumb, idx) => {
+    if (idx === currentImageIndex) {
+      thumb.style.borderColor = '#d4af37';
+    } else {
+      thumb.style.borderColor = 'transparent';
+    }
+  });
+}
+
+// Додати keyboard навігацію для фото
+document.addEventListener('keydown', function(event) {
+  const modal = document.getElementById("modal");
+  if (modal && modal.style.display === 'block' && currentPropertyImages.length > 1) {
+    if (event.key === 'ArrowLeft') {
+      previousPropertyImage();
+    } else if (event.key === 'ArrowRight') {
+      nextPropertyImage();
+    }
+  }
+});
 
 

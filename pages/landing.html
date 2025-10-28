@@ -3,112 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Про нас - EstatyQ</title>
+    <title>Про нас - EstatyQ | Премієм Агенція Нерухомості</title>
+    <meta name="description" content="Дізнайтесь про EstatyQ - сучасну платформу для пошуку нерухомості в Україні. Наша команда експертів допомагає людям знаходити ідеальне житло.">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Про EstatyQ - Премієм Агенція Нерухомості">
+    <meta property="og:description" content="Дізнайтесь про нашу команду, цінності і опробувань досвід у пошуку ідеальної нерухомості.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://estatyq.ua/pages/landing.html">
+    <meta property="og:image" content="https://estatyq.ua/logo.svg">
+    <meta property="og:site_name" content="EstatyQ">
+    <meta property="og:locale" content="uk_UA">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Про EstatyQ">
+    <meta name="twitter:description" content="Дізнайтесь більше про нашу премієм агенцію нерухомості.">
+    
+    <!-- Canonical -->
+    <link rel="canonical" href="https://estatyq.ua/pages/landing.html">
+    
+    <!-- Icons -->
     <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../assets/images/favicon.svg">
+    
+    <!-- Performance: DNS-Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
     <link rel="stylesheet" href="../css/styles.css">
+    
+    <style>
+        /* Critical CSS for above-the-fold */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Roboto', sans-serif;
+            color: #ffffff;
+            background: #0a0a0a;
+        }
+        .navbar { background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
+        .hero { background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 60px 20px; text-align: center; }
+    </style>
 </head>
 <body>
-    <!-- Навігація -->
-    <nav class="navbar">
+    <a class="skip-link" href="#main-content">Перейти до основного контенту</a>
+    
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Головна навігація">
         <div class="container">
-            <div class="logo">
-                <img src="../обрезаный_логотип-removebg-preview.png" alt="ESTATYQ" class="logo-icon-image"/>
+            <div class="logo" onclick="location.href='../index.html'" role="button" tabindex="0" aria-label="Логотип EstatyQ">
+                <img src="../обрезаный_логотип-removebg-preview.png" alt="ESTATYQ" class="logo-icon-image" loading="eager" decoding="async"/>
                 <div class="logo-text">
                     <h1>ESTATYQ</h1>
                     <p class="logo-tagline">МРІЯ СТАЄ РЕАЛЬНІСТЮ</p>
                 </div>
             </div>
-            <ul class="nav-links">
+            <ul class="nav-links" role="list">
                 <li><a href="../index.html">Каталог</a></li>
-                <li><a href="landing.html" class="active">Про нас</a></li>
+                <li><a href="landing.html" class="active" aria-current="page">Про нас</a></li>
                 <li><a href="content.html">Контент</a></li>
                 <li><a href="contact.html">Контакти</a></li>
             </ul>
         </div>
     </nav>
 
-    <!-- Hero секція -->
-    <section class="hero">
+    <!-- Hero Section -->
+    <section class="hero" role="region" aria-label="Привіт-секція">
         <div class="container hero-content">
             <h1 class="hero-title">Про <span class="gradient-text">EstatyQ</span></h1>
             <p class="hero-subtitle">Ми допомагаємо людям знаходити своє ідеальне житло</p>
         </div>
     </section>
 
-    <!-- Про компанію -->
-    <section class="stats-section">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.5rem;">Наша історія</h2>
-            <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 0 auto; color: #d0d0d0; text-align: center;">
-                EstatyQ - це сучасна платформа для пошуку нерухомості, яка з'явилась для того, щоб 
-                змінити ринок нерухомості в Україні. Ми вірим, що кожна людина заслуговує мати доступ до якісної 
-                інформації про нерухомість та висококласного обслуговування від професіоналів своєї справи.
-                <br><br>
-                Наша команда складається з досвідчених агентів і технологів, які працюють разом для того, 
-                щоб створити найкращий досвід для наших клієнтів.
-            </p>
-        </div>
-    </section>
+    <!-- Main Content -->
+    <main id="main-content" role="main">
+        <!-- Stats Section -->
+        <section class="stats-section" aria-labelledby="about-heading">
+            <div class="container">
+                <h2 id="about-heading" style="text-align: center; margin-bottom: 40px; font-size: 2.5rem;">Наша історія</h2>
+                <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 0 auto; color: #d0d0d0; text-align: center;">
+                    EstatyQ - це сучасна платформа для пошуку нерухомості, яка з'явилась для того, щоб 
+                    змінити ринок нерухомості в Україні. Ми вірим, що кожна людина заслуговує мати доступ до якісної 
+                    інформації про нерухомість та висококласного обслуговування від професіоналів своєї справи.
+                    <br><br>
+                    Наша команда складається з досвідчених агентів і технологів, які працюють разом для того, 
+                    щоб створити найкращий досвід для наших клієнтів.
+                </p>
+            </div>
+        </section>
 
-    <!-- Переваги -->
-    <section class="advantages-section">
-        <div class="container">
-            <h2>Чому вибирають EstatyQ</h2>
-            <div class="advantages-grid">
-                <div class="advantage-card">
-                    <div class="advantage-icon">✨</div>
-                    <h3>100% Прозорість</h3>
-                    <p>Немає прихованих комісій, всі умови чесні та прозорі</p>
-                </div>
-                <div class="advantage-card">
-                    <div class="advantage-icon">🎯</div>
-                    <h3>Точність</h3>
-                    <p>Актуальна інформація про кожен об'єкт та його характеристики</p>
-                </div>
-                <div class="advantage-card">
-                    <div class="advantage-icon">🚀</div>
-                    <h3>Швидкість</h3>
-                    <p>Швидкий пошук та оформлення угод за 24 години</p>
-                </div>
-                <div class="advantage-card">
-                    <div class="advantage-icon">🔐</div>
-                    <h3>Безпека</h3>
-                    <p>Гарантія безпеки всіх угод та захист прав сторін</p>
+        <!-- Advantages Section -->
+        <section class="advantages-section" aria-labelledby="advantages-heading">
+            <div class="container">
+                <h2 id="advantages-heading">Чому вибирають EstatyQ</h2>
+                <div class="advantages-grid">
+                    <article class="advantage-card">
+                        <div class="advantage-icon" aria-hidden="true">✨</div>
+                        <h3>100% Прозорість</h3>
+                        <p>Немає прихованих комісій, всі умови чесні та прозорі</p>
+                    </article>
+                    <article class="advantage-card">
+                        <div class="advantage-icon" aria-hidden="true">🎯</div>
+                        <h3>Точність</h3>
+                        <p>Актуальна інформація про кожен об'єкт та його характеристики</p>
+                    </article>
+                    <article class="advantage-card">
+                        <div class="advantage-icon" aria-hidden="true">🚀</div>
+                        <h3>Швидкість</h3>
+                        <p>Швидкий пошук та оформлення угод за 24 години</p>
+                    </article>
+                    <article class="advantage-card">
+                        <div class="advantage-icon" aria-hidden="true">🔐</div>
+                        <h3>Безпека</h3>
+                        <p>Гарантія безпеки всіх угод та захист прав сторін</p>
+                    </article>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Статистика -->
-    <section class="stats-section">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">🏠</div>
-                    <div class="stat-value">500+</div>
-                    <div class="stat-label">Об'єктів у каталозі</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">😊</div>
-                    <div class="stat-value">1000+</div>
-                    <div class="stat-label">Задоволених клієнтів</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-value">50+</div>
-                    <div class="stat-label">Професіоналів на команду</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🌍</div>
-                    <div class="stat-value">6</div>
-                    <div class="stat-label">Міст обслуговування</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Футер -->
-    <footer class="footer">
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
         <div class="container footer-content">
             <div class="footer-section">
                 <h4>EstatyQ</h4>
@@ -116,7 +135,7 @@
             </div>
             <div class="footer-section">
                 <h4>Швидке Меню</h4>
-                <ul>
+                <ul role="list">
                     <li><a href="../index.html">Каталог</a></li>
                     <li><a href="landing.html">Про нас</a></li>
                     <li><a href="content.html">Контент</a></li>
@@ -124,8 +143,8 @@
             </div>
             <div class="footer-section">
                 <h4>Контакти</h4>
-                <p>+380 (44) 123-45-67</p>
-                <p>info@estatyq.ua</p>
+                <p><a href="tel:+380441234567">+380 (44) 123-45-67</a></p>
+                <p><a href="mailto:info@estatyq.ua">info@estatyq.ua</a></p>
             </div>
         </div>
         <div class="footer-bottom">
@@ -133,7 +152,23 @@
         </div>
     </footer>
 
-    <script src="../js/script.js"></script>
+    <!-- JSON-LD Schema for Organization -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "EstatyQ",
+        "description": "Премієм агенція нерухомості в Україні",
+        "url": "https://estatyq.ua",
+        "logo": "https://estatyq.ua/logo.svg",
+        "telephone": "+380441234567",
+        "email": "info@estatyq.ua",
+        "areaServed": "UA",
+        "sameAs": [
+            "https://t.me/estatyq_kyiv"
+        ]
+    }
+    </script>
 </body>
 </html>
 
