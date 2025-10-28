@@ -35,7 +35,10 @@
       labels,
       sort: get('sort') || 'date_desc',
       page: get('page') || '1',
-      perPage: get('perPage') || '20'
+      perPage: get('perPage') || '20',
+      // BUG-09 FIX: Add displayedCount and view
+      displayedCount: num('displayedCount') || '12',
+      view: get('view') || 'grid'
     };
   }
 
@@ -66,6 +69,9 @@
     add('sort', state.sort || 'date_desc');
     add('page', state.page || '1');
     add('perPage', state.perPage || '20');
+    // BUG-09 FIX: Add displayedCount and view
+    add('displayedCount', state.displayedCount || '12');
+    add('view', state.view || 'grid');
     return p.toString();
   }
 

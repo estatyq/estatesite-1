@@ -1062,8 +1062,12 @@ function selectDistrictType(type) {
     if ((btn.textContent.trim() === 'Місто' && districtType === 'city') ||
         (btn.textContent.trim() === 'Область' && districtType === 'region')) {
       btn.classList.add('active');
+      // BUG-07 FIX: Update aria-pressed
+      btn.setAttribute('aria-pressed', 'true');
     } else {
       btn.classList.remove('active');
+      // BUG-07 FIX: Update aria-pressed
+      btn.setAttribute('aria-pressed', 'false');
     }
   });
   
@@ -1180,7 +1184,9 @@ function applyFilters() {
   let filtered = allProperties.filter(prop => {
     // Глобальний пошук
     if (filters.searchQuery) {
-      const searchText = `${prop.title} ${prop.location} ${cities[prop.city].name} ${propertyTypes[prop.type]}`.toLowerCase();
+      // BUG-03 FIX: Safe access to cities[prop.city]
+      const cityName = cities[prop.city]?.name || 'Невідоме місто';
+      const searchText = `${prop.title} ${prop.location} ${cityName} ${propertyTypes[prop.type]}`.toLowerCase();
       if (!searchText.includes(filters.searchQuery)) return false;
     }
     
@@ -1235,7 +1241,7 @@ function applyFilters() {
     if (filters.daily && !prop.daily) return false;
     if (filters.floorMin && prop.floor < parseFloat(filters.floorMin)) return false;
     if (filters.floorMax && prop.floor > parseFloat(filters.floorMax)) return false;
-    if (filters.floorNotLast && prop.floor === prop.floorsTotal) return false;
+    if (filters.floorNotLast && prop.floorsTotal && prop.floor === prop.floorsTotal) return false;
     
     // Нові фільтри
     if (filters.newBuildings && prop.building < 2020) return false;
@@ -1260,8 +1266,9 @@ function applyFilters() {
   updateActiveFilters();
   
   displayedCount = 12;
-  renderProperties(filtered);
+  // BUG-01 FIX: Set filteredProperties FIRST, then render
   filteredProperties = filtered;
+  renderProperties();
   
   // Ensure Telegram button is up to date
   updateTelegramButton();
@@ -1440,7 +1447,7 @@ function renderProperties() {
           <div class="property-list-footer">
             <div class="property-list-actions">
               <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
-              <button class="btn-like ${isFav ? 'liked' : ''}" onclick="toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
+              <button class="btn-like ${isFav ? 'liked' : ''}" onclick="event.stopPropagation(); toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
             </div>
           </div>
         </div>
@@ -1474,7 +1481,7 @@ function renderProperties() {
 
           <div class="property-action">
             <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
-            <button class="btn-like ${isFav ? 'liked' : ''}" onclick="toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
+            <button class="btn-like ${isFav ? 'liked' : ''}" onclick="event.stopPropagation(); toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
           </div>
         </div>
       `;
@@ -1635,7 +1642,7 @@ function renderProperties() {
           <div class="property-list-footer">
             <div class="property-list-actions">
               <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
-              <button class="btn-like ${isFav ? 'liked' : ''}" onclick="toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
+              <button class="btn-like ${isFav ? 'liked' : ''}" onclick="event.stopPropagation(); toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
             </div>
           </div>
         </div>
@@ -1669,7 +1676,7 @@ function renderProperties() {
 
           <div class="property-action">
             <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
-            <button class="btn-like ${isFav ? 'liked' : ''}" onclick="toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
+            <button class="btn-like ${isFav ? 'liked' : ''}" onclick="event.stopPropagation(); toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
           </div>
         </div>
       `;
@@ -1953,13 +1960,18 @@ function resetFilters() {
 function toggleAdvancedFilters() {
   const advancedFilters = document.getElementById('advanced-filters');
   const toggleText = document.getElementById('filters-toggle-text');
+  const toggleBtn = event?.target?.closest('button') || document.querySelector('[onclick="toggleAdvancedFilters()"]');
   
   if (advancedFilters.style.display === 'none') {
     advancedFilters.style.display = 'block';
     toggleText.textContent = 'Приховати фільтри';
+    // BUG-05 FIX: Update aria-expanded
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
   } else {
     advancedFilters.style.display = 'none';
     toggleText.textContent = 'Розширені фільтри';
+    // BUG-05 FIX: Update aria-expanded
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
   }
 }
 
@@ -2136,10 +2148,17 @@ function initializeAdvancedFilters() {
       if (filters.rooms === rooms) {
         filters.rooms = null;
         this.classList.remove('active');
+        // BUG-06 FIX: Update aria-pressed
+        this.setAttribute('aria-pressed', 'false');
       } else {
         filters.rooms = rooms;
-        document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+        // BUG-06 FIX: Update aria-pressed for all buttons
+        document.querySelectorAll('.room-btn').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
         this.classList.add('active');
+        this.setAttribute('aria-pressed', 'true');
       }
       applyFilters();
     });
@@ -2238,9 +2257,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // 🔴 ИСПРАВЛЕНИЕ: Загружаем и нормализуем данные из JSON файла
   loadProperties().then(() => {
-    // Устанавливаем транзакшн по умолчанию
-    // filters.transaction = 'sale';  // Временно отключено чтобы видеть все данные
-    filters.transaction = null;  // Показываем все типы транзакций
+    // BUG-13 FIX: Restore filters from URL first
+    restoreURLState();
+    
+    // BUG-10 FIX: Set transaction = 'sale' to match active button in HTML
+    if (!filters.transaction) {
+      filters.transaction = 'sale';  // Синхронізуємо з активною кнопкою
+    }
     
     // Инициализируем основные фильтры
     renderCityButtons();
