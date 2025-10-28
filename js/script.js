@@ -300,7 +300,9 @@ const locations = {
 };
 
 // ==================== ГЕНЕРАЦІЯ ДАНИХ ====================
-
+// Функция generateProperties() больше не используется, данные загружаются с API
+// Оставляем для справки, но она не вызывается при инициализации
+/*
 function generateProperties() {
   const properties = [];
   let id = 1;
@@ -500,11 +502,12 @@ function generateProperties() {
   
   return properties;
 }
+*/
 
 // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
 
-const allProperties = generateProperties();
-let filteredProperties = [...allProperties];
+let allProperties = [];
+let filteredProperties = [];
 
 let filters = {
   region: null,
@@ -555,6 +558,51 @@ let selectedMetroLine = null;
 
 let displayedCount = 12;
 const INCREMENT = 12;
+
+// ==================== API ФУНКЦИИ ====================
+
+async function loadPropertiesFromAPI() {
+  try {
+    const response = await fetch('/api/listings?limit=1000');
+    const result = await response.json();
+    
+    if (result.success && result.data) {
+      // Преобразуем данные из API в формат приложения
+      allProperties = result.data.map(item => ({
+        id: item.id || `listing-${Math.random()}`,
+        title: item.location_address || 'Без адреси',
+        description: item.description || '',
+        location: `${item.location_city}, ${item.location_district}`,
+        price: item.price_value ? parseInt(item.price_value) : 0,
+        currency: item.price_currency || 'USD',
+        area: item.area_total ? parseInt(item.area_total) : null,
+        rooms: item.rooms ? parseInt(item.rooms) : null,
+        floor: item.floor_current ? parseInt(item.floor_current) : null,
+        totalFloors: item.floor_total ? parseInt(item.floor_total) : null,
+        type: (item.type || 'apartment').toLowerCase(),
+        transaction: (item.transaction_type || 'sale').toLowerCase(),
+        images: item.images || [],
+        city: item.location_city_key || 'kyiv',
+        year: item.year_built ? parseInt(item.year_built) : new Date().getFullYear(),
+        amenities: {
+          balcony: item.amenities_balcony || false,
+          parking: item.amenities_parking || false,
+          metro: item.amenities_metro || null
+        }
+      }));
+      
+      filteredProperties = [...allProperties];
+      console.log(`Загружено ${allProperties.length} объектов с API`);
+      return true;
+    } else {
+      console.error('Ошибка: API вернул некорректный результат');
+      return false;
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки данных с API:', error);
+    return false;
+  }
+}
 
 // ==================== РЕНДЕРИНГ КНОПОЧНЫХ ФИЛЬТРОВ ====================
 
@@ -1019,7 +1067,7 @@ function applyFilters() {
     }
     
     // Фільтр по транзакції
-    if (filters.transaction && prop.transactionType !== filters.transaction) return false;
+    if (filters.transaction && prop.transaction !== filters.transaction) return false;
     
     // Фільтр по типу
     if (filters.type && prop.type !== filters.type) return false;
@@ -1275,6 +1323,27 @@ function renderProperties() {
   } else {
     btn.style.display = "block";
   }
+  
+  updateResultsCounter();
+}
+
+// Оновлена функція для обновленія счетчика результатів
+function updateResultsCounter() {
+  const counterEl = document.getElementById("results-counter");
+  if (!counterEl) return;
+  
+  const foundCount = document.getElementById("found-count");
+  const paginationInfo = document.getElementById("pagination-info");
+  
+  if (foundCount) {
+    foundCount.textContent = `Знайдено: ${filteredProperties.length}`;
+  }
+  
+  if (paginationInfo) {
+    const displayed = Math.min(displayedCount, filteredProperties.length);
+    const total = filteredProperties.length;
+    paginationInfo.textContent = `Показано ${displayed} з ${total}`;
+  }
 }
 
 // Оновлена функція toggleLike
@@ -1447,6 +1516,8 @@ function renderProperties() {
   } else {
     btn.style.display = "block";
   }
+  
+  updateResultsCounter();
 }
 
 function loadMoreProperties() {
@@ -1893,25 +1964,32 @@ function isFavorite(propertyId) {
 document.addEventListener("DOMContentLoaded", function() {
   if (!document.getElementById("city-buttons")) return;
   
-  // Устанавливаем транзакшн по умолчанию
-  filters.transaction = 'sale';
-  
-  // Инициализируем основные фильтры
-  renderCityButtons();
-  renderDistrictChips();
-  updateTableFilters();
-  
-  // Встановлюємо вид за замовчуванням
-  setView('grid');
-  
-  // Добавляем слушатели для быстрых фильтров вверху
-  setupQuickFilters();
-  
-  // Ініціалізуємо розширені фільтри
-  initializeAdvancedFilters();
-  
-  // Рендеримо властивості
-  renderProperties();
+  // Загружаем данные с API
+  loadPropertiesFromAPI().then(() => {
+    // Устанавливаем транзакшн по умолчанию
+    // filters.transaction = 'sale';  // Временно отключено чтобы видеть все данные
+    filters.transaction = null;  // Показываем все типы транзакций
+    
+    // Инициализируем основные фильтры
+    renderCityButtons();
+    renderDistrictChips();
+    updateTableFilters();
+    
+    // Встановлюємо вид за замовчуванням
+    setView('grid');
+    
+    // Добавляем слушатели для быстрых фильтров вверху
+    setupQuickFilters();
+    
+    // Ініціалізуємо розширені фільтри
+    initializeAdvancedFilters();
+    
+    // Применяем фильтры для инициализации filteredProperties
+    applyFilters();
+    
+    // Рендеримо властивості
+    renderProperties();
+  });
 });
 // ==================== БЫСТРЫЕ ФИЛЬТРЫ ВВЕРХУ ====================
 
