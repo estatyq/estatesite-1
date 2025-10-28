@@ -570,9 +570,10 @@ async function loadPropertiesFromAPI() {
       // Преобразуем данные из API в формат приложения
       allProperties = result.data.map(item => ({
         id: item.id || `listing-${Math.random()}`,
-        title: item.location_address || 'Без адреси',
+        title: item.location_address || `Об'єкт ${item.id}`,
         description: item.description || '',
-        location: `${item.location_city}, ${item.location_district}`,
+        // Если адрес пусто, используем город по умолчанию
+        location: item.location_address || item.location_district || 'Київ',
         price: item.price_value ? parseInt(item.price_value) : 0,
         currency: item.price_currency || 'USD',
         area: item.area_total ? parseInt(item.area_total) : null,
@@ -581,14 +582,17 @@ async function loadPropertiesFromAPI() {
         totalFloors: item.floor_total ? parseInt(item.floor_total) : null,
         type: (item.type || 'apartment').toLowerCase(),
         transaction: (item.transaction_type || 'sale').toLowerCase(),
+        transactionType: (item.transaction_type || 'sale').toLowerCase(),  // Для обратной совместимости
         images: item.images || [],
-        city: item.location_city_key || 'kyiv',
+        city: item.location_city_key || 'kyiv',  // Используем city_key как идентификатор города
         year: item.year_built ? parseInt(item.year_built) : new Date().getFullYear(),
+        building: item.year_built ? parseInt(item.year_built) : new Date().getFullYear(),  // Alias для совместимости
         amenities: {
           balcony: item.amenities_balcony || false,
           parking: item.amenities_parking || false,
           metro: item.amenities_metro || null
-        }
+        },
+        image: (item.images && item.images[0]) || 'https://via.placeholder.com/400x300?text=No+Image'  // Для совместимости с renderProperties
       }));
       
       filteredProperties = [...allProperties];
