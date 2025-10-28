@@ -513,6 +513,7 @@ let filteredProperties = [];
 let currentPropertyImages = [];
 let currentImageIndex = 0;
 let lastFocusedElement = null;
+let modalKeydownHandler = null;
 
 // ==================== FORMATTERS & HELPERS ====================
 const PLACEHOLDER = '—';
@@ -1196,8 +1197,11 @@ function applyFilters() {
       if (!regionCities.includes(prop.city)) return false;
     }
     
-    // Фільтр по транзакції
-    if (filters.transaction && prop.transaction !== filters.transaction) return false;
+    // Фільтр по транзакції (безпечний фолбек для JSON і API)
+    if (filters.transaction) {
+      const tx = prop.transactionType || prop.transaction;
+      if (tx !== filters.transaction) return false;
+    }
     
     // Фільтр по типу
     if (filters.type && prop.type !== filters.type) return false;
@@ -1386,140 +1390,6 @@ function removeFilter(filterKey) {
 
 // ==================== РЕНДЕРИНГ СВОЙСТВ ====================
 
-function renderProperties() {
-  const grid = document.getElementById("properties-grid");
-  grid.innerHTML = "";
-  
-  const toShow = filteredProperties.slice(0, displayedCount);
-  
-  if (toShow.length === 0) {
-    grid.innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #d0d0d0;">
-        <div style="font-size: 4rem; margin-bottom: 20px;">🔍</div>
-        <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: var(--primary-color);">Об'єктів не знайдено</h3>
-        <p style="font-size: 1rem; margin-bottom: 30px;">Спробуйте змінити параметри пошуку або скинути фільтри</p>
-        <button class="btn btn-primary" onclick="resetAllFilters()">Скинути фільтри</button>
-      </div>
-    `;
-    document.getElementById("load-more-btn").style.display = "none";
-    return;
-  }
-  
-  toShow.forEach(prop => {
-    const isFav = isFavorite(prop.id);
-    const features = [];
-    if (prop.building >= 2020) features.push('Новобудова');
-    if (prop.metro) features.push('Метро');
-    if (prop.parking) features.push('Паркінг');
-    if (prop.balcony) features.push('Балкон');
-    if (prop.daily) features.push('Подобово');
-    
-    const featuresHtml = features.map(feature => `<span class="feature-tag">${feature}</span>`).join('');
-    const status = prop.daily ? 'Подобово' : (prop.transactionType === 'sale' ? 'Продаж' : 'Оренда');
-    
-    if (currentView === 'list') {
-      // Рендеринг для списку
-      const item = document.createElement("div");
-      item.className = "property-list-item";
-      item.innerHTML = `
-        <div class="property-list-image">
-          <img src="${primaryImage(prop)}" alt="${safeText(prop.title)}" loading="lazy" decoding="async" onerror="this.dataset.error='true'">
-          <div class="property-badge">${status}</div>
-        </div>
-        <div class="property-list-content">
-          <div class="property-list-header">
-            <div>
-              <h3 class="property-list-title">${safeText(prop.title)}</h3>
-              <p class="property-list-location">📍 ${safeText(prop.location)}, ${cities[prop.city] ? cities[prop.city].name : PLACEHOLDER}</p>
-            </div>
-            <div class="property-list-price">${formatPrice(prop.price, prop.currency, prop.transactionType === 'rent')}</div>
-          </div>
-          
-          <div class="property-list-details">
-            ${Number(prop.rooms) > 0 ? `<div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.rooms)}</div><div class="property-list-detail-label">Кімнат</div></div>` : ""}
-            <div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.area)}</div><div class="property-list-detail-label">м²</div></div>
-            ${Number.isFinite(Number(prop.floor)) ? `<div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.floor)}</div><div class="property-list-detail-label">Поверх</div></div>` : ""}
-            ${Number.isFinite(Number(prop.plotArea)) ? `<div class="property-list-detail"><div class="property-list-detail-value">${formatInt(prop.plotArea)}</div><div class="property-list-detail-label">Сот</div></div>` : ""}
-          </div>
-          
-          ${featuresHtml ? `<div class="property-features">${featuresHtml}</div>` : ''}
-          
-          <div class="property-list-footer">
-            <div class="property-list-actions">
-              <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
-              <button class="btn-like ${isFav ? 'liked' : ''}" onclick="event.stopPropagation(); toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
-            </div>
-          </div>
-        </div>
-      `;
-      item.addEventListener('click', () => openModal(prop.id));
-      grid.appendChild(item);
-    } else {
-      // Рендеринг для сітки
-      const card = document.createElement("div");
-      card.className = "property-card";
-      card.innerHTML = `
-        <div class="property-image">
-          <img src="${primaryImage(prop)}" alt="${safeText(prop.title)}" loading="lazy" decoding="async" onerror="this.dataset.error='true'" style="width: 100%; height: 100%; object-fit: cover;">
-          <div class="property-badge">${status}</div>
-          ${prop.building ? `<div class="property-status">${safeText(prop.building)} р.</div>` : ''}
-        </div>
-        <div class="property-content">
-          <h3 class="property-title">${safeText(prop.title)}</h3>
-          <p class="property-location">${safeText(prop.location)}, ${cities[prop.city] ? cities[prop.city].name : PLACEHOLDER}</p>
-          
-          <div class="property-details">
-            ${Number(prop.rooms) > 0 ? `<div class="detail-item"><div class="detail-item-value">${formatInt(prop.rooms)}</div><div class="detail-item-label">Кімнат</div></div>` : ""}
-            <div class="detail-item"><div class="detail-item-value">${formatInt(prop.area)}</div><div class="detail-item-label">м²</div></div>
-            ${Number.isFinite(Number(prop.floor)) ? `<div class="detail-item"><div class="detail-item-value">${formatInt(prop.floor)}</div><div class="detail-item-label">Поверх</div></div>` : ""}
-            ${Number.isFinite(Number(prop.plotArea)) ? `<div class="detail-item"><div class="detail-item-value">${formatInt(prop.plotArea)}</div><div class="detail-item-label">Сот</div></div>` : ""}
-          </div>
-
-          <div class="property-price">${formatPrice(prop.price, prop.currency, prop.transactionType === 'rent')}</div>
-          
-          ${featuresHtml ? `<div class="property-features">${featuresHtml}</div>` : ''}
-
-          <div class="property-action">
-            <button class="btn-details" onclick="openModal(${prop.id})">Детально</button>
-            <button class="btn-like ${isFav ? 'liked' : ''}" onclick="event.stopPropagation(); toggleLike(${prop.id})">${isFav ? '♥' : '♡'}</button>
-          </div>
-        </div>
-      `;
-      card.addEventListener('click', () => openModal(prop.id));
-      grid.appendChild(card);
-    }
-  });
-  
-  // Показываем/скрываем кнопку "Показати ще"
-  const btn = document.getElementById("load-more-btn");
-  if (displayedCount >= filteredProperties.length) {
-    btn.style.display = "none";
-  } else {
-    btn.style.display = "block";
-  }
-  
-  updateResultsCounter();
-}
-
-// Оновлена функція для обновленія счетчика результатів
-function updateResultsCounter() {
-  const counterEl = document.getElementById("results-counter");
-  if (!counterEl) return;
-  
-  const foundCount = document.getElementById("found-count");
-  const paginationInfo = document.getElementById("pagination-info");
-  
-  if (foundCount) {
-    foundCount.textContent = `Знайдено: ${filteredProperties.length}`;
-  }
-  
-  if (paginationInfo) {
-    const displayed = Math.min(displayedCount, filteredProperties.length);
-    const total = filteredProperties.length;
-    paginationInfo.textContent = `Показано ${displayed} з ${total}`;
-  }
-}
-
 // Оновлена функція toggleLike
 function toggleLike(propertyId) {
   toggleFavorite(propertyId);
@@ -1693,6 +1563,12 @@ function renderProperties() {
     btn.style.display = "block";
   }
   
+  // Ховаємо/показуємо контейнер "Показати ще" для чистого лейаута
+  const btnContainer = document.getElementById("load-more-container");
+  if (btnContainer) {
+    btnContainer.style.display = (btn.style.display === 'none') ? 'none' : 'block';
+  }
+  
   updateResultsCounter();
 }
 
@@ -1701,7 +1577,9 @@ function loadMoreProperties() {
   renderProperties();
   
   // Синхронізувати displayedCount в URL (BUG-2 FIX)
-  // updateURLState(); // TODO: URLState не визначений
+  if (typeof URLState !== 'undefined') {
+    updateURLState();
+  }
 }
 
 // ==================== МОДАЛЬНОЕ ОКНО ====================
@@ -1864,6 +1742,30 @@ function openModal(propId) {
   `;
   
   modal.style.display = "block";
+
+  // Focus trap inside modal
+  const focusableSelectors = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  const focusables = Array.from(modal.querySelectorAll(focusableSelectors));
+  if (focusables.length) {
+    focusables[0].focus();
+  }
+  modalKeydownHandler = function(e) {
+    if (modal.style.display !== 'block') return;
+    if (e.key === 'Tab') {
+      const items = Array.from(modal.querySelectorAll(focusableSelectors));
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
+  document.addEventListener('keydown', modalKeydownHandler);
 }
 
 function closeModal() {
@@ -1871,6 +1773,11 @@ function closeModal() {
   // Повернути фокус на елемент, що мав його раніше
   if (lastFocusedElement && lastFocusedElement.focus) {
     lastFocusedElement.focus();
+  }
+  // Remove focus trap listener
+  if (modalKeydownHandler) {
+    document.removeEventListener('keydown', modalKeydownHandler);
+    modalKeydownHandler = null;
   }
 }
 
@@ -1917,6 +1824,8 @@ function resetFilters() {
     city: null,
     districts: [],
     microdistricts: [],
+    metroStations: [],
+    metro: null,
     transaction: null,
     type: null,
     location: null,
@@ -1939,7 +1848,13 @@ function resetFilters() {
     officeType: null,
     commercialType: null,
     landType: null,
-    warehouseType: null
+    warehouseType: null,
+    searchQuery: '',
+    newBuildings: false,
+    metroNearby: false,
+    parking: false,
+    balcony: false,
+    favorites: []
   };
   
   // Очистити форму фільтрів (якщо вони існують)
@@ -2250,10 +2165,11 @@ function isFavorite(propertyId) {
 // ==================== ІНЦІАЛІЗАЦІЯ ====================
 
 document.addEventListener("DOMContentLoaded", function() {
-  if (!document.getElementById("city-buttons")) return;
-  
-  // Показуємо скелетони на час завантаження
-  showSkeletons(12);
+  // Показуємо скелетони на час завантаження (якщо є каталог)
+  const cityButtons = document.getElementById("city-buttons");
+  if (cityButtons) {
+    showSkeletons(12);
+  }
 
   // 🔴 ИСПРАВЛЕНИЕ: Загружаем и нормализуем данные из JSON файла
   loadProperties().then(() => {
@@ -2265,18 +2181,20 @@ document.addEventListener("DOMContentLoaded", function() {
       filters.transaction = 'sale';  // Синхронізуємо з активною кнопкою
     }
     
-    // Инициализируем основные фильтры
-    renderCityButtons();
-    renderDistrictChips();
-    updateTableFilters();
+    // Инициализируем основные фильтры (тільки якщо є каталог)
+    if (cityButtons) {
+      renderCityButtons();
+      renderDistrictChips();
+      updateTableFilters();
+    }
     
     // Встановлюємо вид з localStorage або за замовчуванням
     const savedView = localStorage.getItem('estatyq_view') || 'grid';
     setView(savedView);
     
-    // Добавляем слушатели для быстрых фильтров вверху
+    // 🔴 ИСПРАВЛЕНИЕ: Добавляем слушатели для быстрых фильтров ВСЕГДА (не зависит от city-buttons)
     setupQuickFilters();
-    
+
     // Ініціалізуємо розширені фільтри
     initializeAdvancedFilters();
     
@@ -2361,14 +2279,12 @@ function getCityData() {
   return null;
 }
 
-// Перевірка чи об'єкт у улюблених
-function isFavorite(propertyId) {
-  return favorites.includes(propertyId);
-}
-
 // ==================== URL STATE MANAGEMENT ====================
 
 function updateURLState() {
+  if (typeof URLState === 'undefined' || !URLState || typeof URLState.stringify !== 'function') {
+    return; // URLState not available on this page
+  }
   const state = {
     q: filters.searchQuery || '',
     city: filters.city || '',
@@ -2391,6 +2307,9 @@ function updateURLState() {
 
 // Загрузити стан з URL при завантаженні сторінки
 function restoreURLState() {
+  if (typeof URLState === 'undefined' || !URLState || typeof URLState.parse !== 'function') {
+    return;
+  }
   const state = URLState.parse(location.search);
   
   if (state.q) filters.searchQuery = state.q;
@@ -2472,5 +2391,24 @@ document.addEventListener('keydown', function(event) {
     }
   }
 });
+
+// Обновление счетчика результатов
+function updateResultsCounter() {
+  const counterEl = document.getElementById("results-counter");
+  if (!counterEl) return;
+  
+  const foundCount = document.getElementById("found-count");
+  const paginationInfo = document.getElementById("pagination-info");
+  
+  if (foundCount) {
+    foundCount.textContent = `Знайдено: ${filteredProperties.length}`;
+  }
+  
+  if (paginationInfo) {
+    const displayed = Math.min(displayedCount, filteredProperties.length);
+    const total = filteredProperties.length;
+    paginationInfo.textContent = `Показано ${displayed} з ${total}`;
+  }
+}
 
 
