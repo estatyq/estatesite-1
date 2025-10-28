@@ -1,9 +1,9 @@
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const axios = require('axios');
 const { parseString } = require('xml2js');
 const { Pool } = require('pg');
-const path = require('path');
-const fs = require('fs');
 
 // Read .env from data folder
 const envPath = path.join(__dirname, '../data/.env');
@@ -86,70 +86,85 @@ function convertXMLToListings(xmlJson) {
   const listings = [];
   
   try {
-    // Extract shop > offers > offer from Yandex XML format
+    // Support both formats:
+    // 1. Yandex: yml_catalog.shop.offers.offer
+    // 2. Estate: realty-feed.offer
+    
+    let offers = null;
+    
+    // Try Yandex format
     if (xmlJson?.yml_catalog?.shop?.offers?.offer) {
-      const offers = Array.isArray(xmlJson.yml_catalog.shop.offers.offer)
-        ? xmlJson.yml_catalog.shop.offers.offer
-        : [xmlJson.yml_catalog.shop.offers.offer];
-      
-      console.log(`📊 Found ${offers.length} offers in XML`);
-      
-      offers.forEach((offer, index) => {
-        try {
-          // Map Yandex XML fields to our listing format
-          const listing = {
-            id: offer.id || `listing-${index}`,
-            type: mapPropertyType(offer.category),
-            transactionType: 'sale', // Default, could be extracted from description
-            price: {
-              value: parseFloat(offer.price) || 0,
-              currency: offer.currencyId || 'USD'
-            },
-            area: {
-              total: parseFloat(offer.area) || null,
-              living: null,
-              plot: null
-            },
-            rooms: parseInt(offer.rooms) || null,
-            floor: {
-              current: parseInt(offer.floor) || null,
-              total: parseInt(offer.floorCount) || null
-            },
-            yearBuilt: parseInt(offer.buildYear) || new Date().getFullYear(),
-            location: {
-              country: 'Ukraine',
-              region: offer.region || '',
-              city: offer.city || 'Kyiv',
-              cityKey: mapCityKey(offer.city),
-              district: offer.district || '',
-              microdistrict: offer.microdistrict || '',
-              address: offer.address || offer.name || '',
-              geo: {
-                lat: parseFloat(offer.latitude) || null,
-                lng: parseFloat(offer.longitude) || null
-              }
-            },
-            amenities: {
-              balcony: offer.balcony === 'true' || offer.balcony === true,
-              parking: offer.parking === 'true' || offer.parking === true,
-              metro: offer.metro || null,
-              features: offer.features ? (Array.isArray(offer.features) ? offer.features : [offer.features]) : []
-            },
-            images: offer.image ? (Array.isArray(offer.image) ? offer.image : [offer.image]) : [],
-            contact: {
-              phone: offer.phone || '',
-              email: offer.email || '',
-              name: offer.seller || ''
-            },
-            description: offer.description || offer.name || ''
-          };
-          
-          listings.push(listing);
-        } catch (error) {
-          console.warn(`⚠️  Error converting offer ${index}:`, error.message);
-        }
-      });
+      offers = xmlJson.yml_catalog.shop.offers.offer;
     }
+    // Try Estate format
+    else if (xmlJson?.['realty-feed']?.offer) {
+      offers = xmlJson['realty-feed'].offer;
+    }
+    
+    if (!offers) {
+      console.log('⚠️  No offers found in XML');
+      return listings;
+    }
+    
+    const offerArray = Array.isArray(offers) ? offers : [offers];
+    
+    console.log(`📊 Found ${offerArray.length} offers in XML`);
+    
+    offerArray.forEach((offer, index) => {
+      try {
+        // Parse apartment/flat data
+        const listing = {
+          id: offer.id || offer.$?.['internal-id'] || `listing-${index}`,
+          type: mapPropertyType(offer.type || offer.category),
+          transactionType: 'sale',
+          price: {
+            value: parseFloat(offer.price?._) || parseFloat(offer.price) || 0,
+            currency: offer.price?.$?.currency || 'USD'
+          },
+          area: {
+            total: parseFloat(offer['total-area']?._) || parseFloat(offer['total-area']) || parseFloat(offer.area) || null,
+            living: null,
+            plot: null
+          },
+          rooms: parseInt(offer.rooms) || null,
+          floor: {
+            current: parseInt(offer['floor']?._ || offer.floor) || null,
+            total: parseInt(offer['floors-total']) || null
+          },
+          yearBuilt: parseInt(offer['year-built']) || new Date().getFullYear(),
+          location: {
+            country: 'Ukraine',
+            region: offer.region || offer.province || '',
+            city: offer.city || '',
+            cityKey: mapCityKey(offer.city),
+            district: offer.district || '',
+            microdistrict: offer['sub-district'] || '',
+            address: offer.address || offer.name || '',
+            geo: {
+              lat: parseFloat(offer.latitude) || null,
+              lng: parseFloat(offer.longitude) || null
+            }
+          },
+          amenities: {
+            balcony: String(offer.balcony).toLowerCase() === 'yes',
+            parking: String(offer.parking).toLowerCase() === 'yes',
+            metro: offer.metro || null,
+            features: offer.features ? (Array.isArray(offer.features) ? offer.features : [offer.features]) : []
+          },
+          images: offer.image ? (Array.isArray(offer.image) ? offer.image : [offer.image]) : [],
+          contact: {
+            phone: offer.phone || offer['contact-phone'] || '',
+            email: offer.email || '',
+            name: offer['seller-name'] || ''
+          },
+          description: offer.description || offer.name || ''
+        };
+        
+        listings.push(listing);
+      } catch (error) {
+        console.warn(`⚠️  Error converting offer ${index}:`, error.message);
+      }
+    });
   } catch (error) {
     console.error('❌ Error converting XML to listings:', error.message);
   }
